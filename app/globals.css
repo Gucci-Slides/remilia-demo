@@ -1,26 +1,1013 @@
 @import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+/* ═══════════════════════════════════════════════════════════════
+   REMILIA TYPOGRAPHY SYSTEM
+   An editorial / monument-first system.
+   Not a marketing layout. A cultural artifact.
+═══════════════════════════════════════════════════════════════ */
+
+/* ─────────────────────────────────────────────────────────────
+   @FONT-FACE DECLARATIONS
+
+   ITC Benguiat and Canela are proprietary fonts.
+   Place font files in /public/fonts/ for these to load.
+   If files are missing, fallbacks will be used automatically.
+───────────────────────────────────────────────────────────── */
+
+/* ITC Benguiat — Monument / Logo / Ritual Moments */
+@font-face {
+  font-family: "ITC Benguiat";
+  src: url("/fonts/ITCBenguiat-Book.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "ITC Benguiat";
+  src: url("/fonts/ITCBenguiat-Bold.woff2") format("woff2");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Canela — Editorial Headings / Inscriptions */
+@font-face {
+  font-family: "Canela";
+  src: url("/fonts/Canela-Light.woff2") format("woff2");
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Canela";
+  src: url("/fonts/Canela-Regular.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Canela";
+  src: url("/fonts/Canela-Medium.woff2") format("woff2");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* ─────────────────────────────────────────────────────────────
+     FONT STACK (Strict Usage)
+
+     A. Monument: ITC Benguiat — wordmarks, monumental statements
+     B. Editorial: Canela — headings, inscriptions, narrative
+     C. Meta: Inter — metadata, labels, navigation hints
+  ───────────────────────────────────────────────────────────── */
+
+  --font-monument: "ITC Benguiat", "Georgia", "Times New Roman", serif;
+  --font-editorial: "Canela", "Georgia", "Times New Roman", serif;
+  /* --font-meta is set by Next.js font loader (Inter) */
+
+  /* ─────────────────────────────────────────────────────────────
+     RHYTHM UNIT
+     Base unit: --u = 8px
+     All spacing derives from this unit
+  ───────────────────────────────────────────────────────────── */
+  --u: 8px;
+
+  /* ─────────────────────────────────────────────────────────────
+     MEASURES (line widths)
+  ───────────────────────────────────────────────────────────── */
+  --measure-lg: 52ch;  /* Desktop */
+  --measure-md: 44ch;  /* Tablet */
+  --measure-sm: 34ch;  /* Mobile */
+
+  /* ─────────────────────────────────────────────────────────────
+     COLORS
+     Minimal. Black on off-white. No gradients.
+  ───────────────────────────────────────────────────────────── */
+  --monument-black: #000000;
+  --muted: oklch(0.97 0 0);
+  --border: oklch(0.922 0 0);
+  --paper: #f4f1ea;
+  --radius: 0.625rem;
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.145 0 0);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.145 0 0);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.145 0 0);
+  --primary: oklch(0.205 0 0);
+  --primary-foreground: oklch(0.985 0 0);
+  --secondary: oklch(0.97 0 0);
+  --secondary-foreground: oklch(0.205 0 0);
+  --muted-foreground: oklch(0.556 0 0);
+  --accent: oklch(0.97 0 0);
+  --accent-foreground: oklch(0.205 0 0);
+  --destructive: oklch(0.577 0.245 27.325);
+  --input: oklch(0.922 0 0);
+  --ring: oklch(0.708 0 0);
+  --chart-1: oklch(0.646 0.222 41.116);
+  --chart-2: oklch(0.6 0.118 184.704);
+  --chart-3: oklch(0.398 0.07 227.392);
+  --chart-4: oklch(0.828 0.189 84.429);
+  --chart-5: oklch(0.769 0.188 70.08);
+  --sidebar: oklch(0.985 0 0);
+  --sidebar-foreground: oklch(0.145 0 0);
+  --sidebar-primary: oklch(0.205 0 0);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.97 0 0);
+  --sidebar-accent-foreground: oklch(0.205 0 0);
+  --sidebar-border: oklch(0.922 0 0);
+  --sidebar-ring: oklch(0.708 0 0);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-muted: var(--muted);
+  --color-border: var(--border);
+  --color-paper: var(--paper);
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-mono);
+  --font-bebas: var(--font-bebas);
+  --font-display: "Neue Haas Grotesk Display", "Helvetica Now Display", "Helvetica Neue", -apple-system, BlinkMacSystemFont, sans-serif;
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+  --radius-3xl: calc(var(--radius) + 12px);
+  --radius-4xl: calc(var(--radius) + 16px);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* ═══════════════════════════════════════════════════════════════
+   BASE STYLES
+═══════════════════════════════════════════════════════════════ */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans), -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 14px;
+  line-height: 1.4;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   TYPOGRAPHIC HIERARCHY
+
+   Monument → ITC Benguiat (oversized wordmarks only)
+   Editorial → Canela (headings, inscriptions, narrative)
+   Meta → Inter (metadata, labels, navigation)
+
+   RULES:
+   - Monument: uppercase only, never twice in same viewport
+   - Editorial: sentence case or small caps, generous line height
+   - Meta: small, low contrast, never visually dominant
+═══════════════════════════════════════════════════════════════ */
+
+/* ─────────────────────────────────────────────────────────────
+   MONUMENT — The oversized REMILIA wordmark
+
+   Usage:
+   - Monumental single-word statements
+   - Section dividers that function as visual gravity
+   - Black (#000) on off-white background only
+
+   Never use for:
+   - Body copy, paragraphs, UI labels
+───────────────────────────────────────────────────────────── */
+.monument {
+  font-family: var(--font-monument);
+  font-size: clamp(6rem, 14vw, 12rem);
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  line-height: 0.85;
+  text-transform: uppercase;
+  color: var(--monument-black);
+}
+
+/* Legacy alias for existing components */
+.role-monument {
+  font-family: var(--font-monument);
+  font-size: clamp(6rem, 14vw, 12rem);
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  line-height: 0.85;
+  text-transform: uppercase;
+  color: var(--monument-black);
+}
+
+/* ─────────────────────────────────────────────────────────────
+   EDITORIAL HEADLINE — Section titles, declarations
+
+   Usage:
+   - Section titles
+   - Declarative statements
+   - Philosophical lines
+
+   Rules:
+   - Sentence case or small caps
+   - Medium–Light weights only
+   - Center-aligned or carefully offset on grid
+───────────────────────────────────────────────────────────── */
+.editorial-headline {
+  font-family: var(--font-editorial);
+  font-size: clamp(1.8rem, 4vw, 3.2rem);
+  font-weight: 400;
+  line-height: 1.25;
+  letter-spacing: 0.01em;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   EDITORIAL BODY — Narrative text, scroll text
+
+   This is the voice of Remilia.
+───────────────────────────────────────────────────────────── */
+.editorial-body {
+  font-family: var(--font-editorial);
+  font-size: 1rem;
+  line-height: 1.6;
+  max-width: 42ch;
+  opacity: 0.85;
+}
+
+/* Legacy alias: role-inscription → editorial voice */
+.role-inscription {
+  font-family: var(--font-editorial);
+  font-size: clamp(1rem, 1.5vw, 1.25rem);
+  font-weight: 400;
+  letter-spacing: 0.01em;
+  line-height: 1.4;
+  color: rgba(0, 0, 0, 0.75);
+  max-width: 42ch;
+}
+
+/* Legacy alias: role-body → editorial body */
+.role-body {
+  font-family: var(--font-editorial);
+  font-size: clamp(1rem, 1.2vw, 1.125rem);
+  font-weight: 400;
+  letter-spacing: 0.01em;
+  line-height: 1.6;
+  color: rgba(0, 0, 0, 0.75);
+  max-width: 42ch;
+}
+
+@media (max-width: 1024px) {
+  .role-body,
+  .editorial-body {
+    max-width: var(--measure-md);
+  }
+}
+
+@media (max-width: 640px) {
+  .role-body,
+  .editorial-body {
+    max-width: var(--measure-sm);
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────
+   META — Metadata, utility, index text
+
+   Usage:
+   - Metadata, index labels
+   - Navigation hints
+   - Registry IDs, scroll markers
+
+   Rules:
+   - Small size, low contrast
+   - Never visually dominant
+   - Never used for philosophy or narrative
+───────────────────────────────────────────────────────────── */
+.meta {
+  font-family: var(--font-meta), "Inter", system-ui, sans-serif;
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.5;
+}
+
+/* Legacy alias: role-reference → meta */
+.role-reference {
+  font-family: var(--font-meta), "Inter", system-ui, sans-serif;
+  font-size: 0.6875rem; /* 11px */
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(0, 0, 0, 0.4);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   JURISDICTION LAYOUT SYSTEM
+
+   This page is not a website — it is an institutional document.
+   Everything should feel measured, restrained, inevitable.
+
+   LAYOUT CONSTANTS (Single Source of Truth):
+   - GUTTER: clamp(20px, 4vw, 64px)
+   - BASELINE: 8px
+   - maxTextWidth: min(42ch, 520px)
+
+   All text snaps to 8px baseline grid.
+   No free-floating placement.
+═══════════════════════════════════════════════════════════════ */
+
+:root {
+  /* Jurisdiction gutter: clamp(20px, 4vw, 64px) */
+  --jurisdiction-gutter: clamp(20px, 4vw, 64px);
+
+  /* Baseline grid unit */
+  --baseline: 8px;
+
+  /* Max text width for left block */
+  --max-text-width: min(42ch, 520px);
+}
+
+/* ─────────────────────────────────────────────────────────────
+   JURISDICTION COLUMN WRAPPER
+
+   Container for the entire sticky stage.
+   Text block uses: left: GUTTER, max-width: maxTextWidth
+   REMILIA monument left edge aligns to SAME GUTTER.
+───────────────────────────────────────────────────────────── */
+
+.jurisdiction-header {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: calc(var(--baseline) * 3) var(--jurisdiction-gutter);
+}
+
+.jurisdiction-column {
+  position: absolute;
+  left: var(--jurisdiction-gutter);
+  right: var(--jurisdiction-gutter);
+  /* Position at ~55-62vh: top: calc(50vh - 4 * BASELINE) */
+  top: calc(50vh - calc(var(--baseline) * 4));
+  z-index: 10;
+}
+
+.jurisdiction-text {
+  max-width: var(--max-text-width);
+}
+
+.jurisdiction-act2-stack {
+  display: flex;
+  flex-direction: column;
+  /* Gap: 2 baseline units = 16px */
+  gap: calc(var(--baseline) * 2);
+  /* Top margin: 4 baseline units = 32px */
+  margin-top: calc(var(--baseline) * 4);
+}
+
+.jurisdiction-monument {
+  position: absolute;
+  bottom: 0;
+  left: var(--jurisdiction-gutter);
+  right: var(--jurisdiction-gutter);
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 5;
+}
+
+.jurisdiction-monument h1 {
+  /* Partially cropped at bottom on initial load */
+  transform: translateY(18%);
+}
+
+.jurisdiction-scroll-hint {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  /* Position above monument: 10 baseline units from bottom */
+  bottom: calc(var(--baseline) * 16);
+  z-index: 30;
+}
+
+.jurisdiction-witness {
+  position: absolute;
+  /* Right-side column aligned to GUTTER */
+  right: var(--jurisdiction-gutter);
+  /* Vertical position aligned to copy block (same top) */
+  top: calc(50vh - calc(var(--baseline) * 4));
+  z-index: 10;
+  text-align: right;
+
+  /* Typography */
+  font-family: var(--font-meta), "Inter", system-ui, sans-serif;
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  line-height: 1.6;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   TYPOGRAPHY TOKENS
+───────────────────────────────────────────────────────────── */
+
+/* t-nav: Navigation / Metadata
+   Font: Inter, 11px, tracking wide, uppercase
+   Used ONLY for: INDEX / REGISTRY, SCROLL indicator */
+.t-nav {
+  font-family: var(--font-meta), "Inter", system-ui, sans-serif;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  line-height: 1.4;
+  opacity: 0.6;
+}
+
+/* t-nav-masthead: Docked masthead (for reduced motion fallback)
+   Font: Inter, 12px, tracking wide */
+.t-nav-masthead {
+  font-family: var(--font-meta), "Inter", system-ui, sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  line-height: 1.4;
+}
+
+/* t-witness: Witness mark / institutional detail
+   Font: Inter, 11px, very low opacity */
+.t-witness {
+  font-family: var(--font-meta), "Inter", system-ui, sans-serif;
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+  line-height: 1.6;
+}
+
+/* t-act1: Act I inscription
+   Canela Regular, 26px desktop / 20px mobile
+   line-height 1.15
+   Opacity: 1 */
+.t-act1 {
+  font-family: var(--font-editorial);
+  font-size: clamp(20px, 2.2vw, 26px);
+  font-weight: 400;
+  letter-spacing: 0.005em;
+  line-height: 1.15;
+  color: #111;
+}
+
+/* t-act2-line: Act II sequential lines
+   Canela Regular, 22px desktop / 18px mobile
+   line-height 1.05–1.1 (tighter)
+   letter-spacing: 0.01em
+   Opacity: 0.92 */
+.t-act2-line {
+  font-family: var(--font-editorial);
+  font-size: clamp(18px, 1.8vw, 22px);
+  font-weight: 400;
+  letter-spacing: 0.01em;
+  line-height: 1.08;
+  color: #1a1a1a;
+  opacity: 0.92;
+}
+
+/* Final line emphasis: Medium weight OR opacity 1 */
+.t-act2-line--emphasis {
+  font-weight: 500;
+  opacity: 1;
+}
+
+/* t-monument: REMILIA wordmark (bottom-anchored variant)
+   Font: ITC Benguiat
+   Size: Extremely large (monumental)
+   Tracking: slightly tight (-2% to -4%)
+   Case: ALL CAPS */
+.t-monument {
+  font-family: var(--font-monument);
+  font-size: clamp(5rem, 16vw, 14rem);
+  font-weight: 400;
+  letter-spacing: -0.03em;
+  line-height: 0.85;
+  text-transform: uppercase;
+  color: var(--monument-black);
+}
+
+/* t-monument-hero: REMILIA wordmark (centered hero variant)
+   Architectural typography, not content.
+   Centered in viewport, transforms during scroll. */
+.t-monument-hero {
+  font-family: var(--font-monument);
+  font-size: clamp(4rem, 18vw, 16rem);
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  line-height: 0.85;
+  text-transform: uppercase;
+  color: var(--monument-black);
+}
+
+/* ─────────────────────────────────────────────────────────────
+   Paper grain overlay (subtle)
+───────────────────────────────────────────────────────────── */
+.bg-paper-grain::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  opacity: 0.02;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   LAYOUT & RHYTHM RULES
+
+   - All text snaps to a vertical rhythm grid
+   - Monument text anchors the viewport bottom or edge
+   - Editorial text floats in relation to the monument
+   - Negative space is intentional and preserved
+   - Avoid symmetry unless deliberately ritualistic
+═══════════════════════════════════════════════════════════════ */
+
+/* Vertical rhythm grid (8px base) */
+.rhythm-grid {
+  line-height: calc(var(--u) * 3); /* 24px baseline */
+}
+
+/* Monument anchor — pins to viewport bottom */
+.monument-anchor {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  overflow: hidden;
+}
+
+/* Editorial float — asymmetric positioning */
+.editorial-float {
+  position: relative;
+  margin-left: auto;
+  margin-right: 0;
+  max-width: 42ch;
+}
+
+.editorial-float--left {
+  margin-left: 0;
+  margin-right: auto;
+}
+
+/* Preserve negative space */
+.preserve-space {
+  padding-top: calc(var(--u) * 12);
+  padding-bottom: calc(var(--u) * 12);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   BEHAVIORAL CONSTRAINTS
+
+   - No hover animations on text
+   - No decorative effects on typography
+   - No gradients, outlines, or shadows
+   - Motion (if any) must be scroll-driven and subtle
+   - Typography must feel inevitable, not interactive
+═══════════════════════════════════════════════════════════════ */
+
+/* Disable hover effects on typography */
+.monument,
+.role-monument,
+.editorial-headline,
+.editorial-body,
+.role-inscription,
+.role-body {
+  transition: none;
+}
+
+.monument:hover,
+.role-monument:hover,
+.editorial-headline:hover,
+.editorial-body:hover,
+.role-inscription:hover,
+.role-body:hover {
+  transform: none;
+  text-shadow: none;
+  filter: none;
+}
+
+/* Meta elements can have subtle opacity transitions (navigation) */
+.meta,
+.role-reference {
+  transition: opacity 0.15s ease;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   RHYTHM SPACING UTILITIES
+   Based on --u = 8px
+═══════════════════════════════════════════════════════════════ */
+
+.gap-u { gap: var(--u); }
+.gap-2u { gap: calc(var(--u) * 2); }
+.gap-3u { gap: calc(var(--u) * 3); }
+.gap-4u { gap: calc(var(--u) * 4); }
+.gap-6u { gap: calc(var(--u) * 6); }
+.gap-8u { gap: calc(var(--u) * 8); }
+
+.mt-u { margin-top: var(--u); }
+.mt-2u { margin-top: calc(var(--u) * 2); }
+.mt-3u { margin-top: calc(var(--u) * 3); }
+.mt-4u { margin-top: calc(var(--u) * 4); }
+.mt-6u { margin-top: calc(var(--u) * 6); }
+.mt-8u { margin-top: calc(var(--u) * 8); }
+
+.mb-u { margin-bottom: var(--u); }
+.mb-2u { margin-bottom: calc(var(--u) * 2); }
+.mb-3u { margin-bottom: calc(var(--u) * 3); }
+.mb-4u { margin-bottom: calc(var(--u) * 4); }
+.mb-6u { margin-bottom: calc(var(--u) * 6); }
+.mb-8u { margin-bottom: calc(var(--u) * 8); }
+
+.py-4u { padding-top: calc(var(--u) * 4); padding-bottom: calc(var(--u) * 4); }
+.py-6u { padding-top: calc(var(--u) * 6); padding-bottom: calc(var(--u) * 6); }
+.py-8u { padding-top: calc(var(--u) * 8); padding-bottom: calc(var(--u) * 8); }
+
+.px-3u { padding-left: calc(var(--u) * 3); padding-right: calc(var(--u) * 3); }
+.px-4u { padding-left: calc(var(--u) * 4); padding-right: calc(var(--u) * 4); }
+.px-6u { padding-left: calc(var(--u) * 6); padding-right: calc(var(--u) * 6); }
+
+/* ═══════════════════════════════════════════════════════════════
+   LEGACY TYPOGRAPHY SYSTEM (for other pages)
+
+   Retained for backwards compatibility with non-landing pages.
+   Landing page should use: .monument, .editorial-*, .meta
+═══════════════════════════════════════════════════════════════ */
+
+/* Wordmark — architectural, massive */
+.type-wordmark {
+  font-family: var(--font-monument);
+  font-size: clamp(6rem, 14vw, 12rem);
+  font-weight: 400;
+  line-height: 0.85;
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
+}
+
+/* Title — large, for hero moments */
+.type-title {
+  font-family: var(--font-editorial);
+  font-size: clamp(28px, 4vw, 48px);
+  font-weight: 400;
+  line-height: 1.2;
+  letter-spacing: 0.01em;
+}
+
+/* Statement — primary narrative text */
+.type-statement {
+  font-family: var(--font-editorial);
+  font-size: clamp(16px, 2vw, 24px);
+  font-weight: 400;
+  line-height: 1.4;
+  letter-spacing: 0.01em;
+}
+
+/* Body — secondary text */
+.type-body {
+  font-family: var(--font-editorial);
+  font-size: clamp(14px, 1.2vw, 16px);
+  font-weight: 400;
+  line-height: 1.6;
+  letter-spacing: 0.01em;
+}
+
+/* Micro — smallest labels */
+.type-micro {
+  font-family: var(--font-meta), "Inter", system-ui, sans-serif;
+  font-size: 11px;
+  font-weight: 400;
+  line-height: 1.4;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.5;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   PAPER BACKGROUND
+   Warm off-white with subtle grain + vignette
+═══════════════════════════════════════════════════════════════ */
+
+.bg-paper {
+  background-color: var(--paper);
+  position: relative;
+}
+
+/* Paper grain overlay */
+.bg-paper::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  opacity: 0.025;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Radial vignette */
+.bg-paper::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(ellipse at center, transparent 40%, rgba(0, 0, 0, 0.035) 100%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.bg-paper > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   FONT CLASSES
+═══════════════════════════════════════════════════════════════ */
+
+/* Primary font stack classes */
+.font-monument {
+  font-family: var(--font-monument);
+}
+
+.font-editorial {
+  font-family: var(--font-editorial);
+}
+
+.font-meta {
+  font-family: var(--font-meta), "Inter", system-ui, sans-serif;
+}
+
+/* Legacy font classes */
+.font-bebas {
+  font-family: var(--font-bebas), sans-serif;
+}
+
+.font-display {
+  font-family: var(--font-display);
+  font-weight: 400;
+  letter-spacing: -0.02em;
+}
+
+.font-mono {
+  letter-spacing: 0.02em;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   LOOKBOOK PAPER TEXTURE (legacy)
+═══════════════════════════════════════════════════════════════ */
+
+.lookbook-paper {
+  position: relative;
+  background-color: var(--paper);
+}
+
+.lookbook-paper::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  opacity: 0.035;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.lookbook-paper > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   EDITORIAL ELEMENTS
+═══════════════════════════════════════════════════════════════ */
+
+.editorial-image {
+  background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 25%, #1a1a1a 50%, #2a2a2a 75%, #1a1a1a 100%);
+  position: relative;
+}
+
+.editorial-image::after {
+  content: attr(data-placeholder);
+  position: absolute;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  font-family: var(--font-mono), monospace;
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.3);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.editorial-link {
+  color: var(--muted);
+  text-decoration: none;
+  font-family: var(--font-mono), monospace;
+}
+
+.editorial-link:focus {
+  outline: 1px solid rgba(0, 0, 0, 0.2);
+  outline-offset: 2px;
+}
+
+.index-link {
+  color: inherit;
+  text-decoration: none;
+}
+
+.index-link:focus {
+  outline: 1px solid rgba(0, 0, 0, 0.2);
+  outline-offset: 2px;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   LOOKBOOK SPREADS
+═══════════════════════════════════════════════════════════════ */
+
+.lookbook-image-container {
+  position: relative;
+}
+
+.lookbook-image-container::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  box-shadow: inset 0 0 60px rgba(0, 0, 0, 0.1);
+  pointer-events: none;
+}
+
+.lookbook-rule {
+  height: 1px;
+  background: #d0d0d0;
+  border: none;
+}
+
+.lookbook-skeleton {
+  background: linear-gradient(90deg, #e8e6e0 0%, #f0ede7 50%, #e8e6e0 100%);
+  background-size: 200% 100%;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   TYPOGRAPHY REFINEMENTS
+═══════════════════════════════════════════════════════════════ */
+
+h1.font-display,
+h2.font-display,
+h3.font-display {
+  font-weight: 400;
+  letter-spacing: -0.02em;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   PRINT STYLES
+═══════════════════════════════════════════════════════════════ */
+
+@media print {
+  body {
+    background: white;
+    color: black;
+  }
+
+  .lookbook-paper,
+  .bg-paper {
+    background: white;
+  }
+
+  .lookbook-paper::before,
+  .lookbook-paper::after,
+  .bg-paper::before,
+  .bg-paper::after {
+    display: none;
+  }
+
+  .editorial-image {
+    background: #f0f0f0;
+  }
+
+  @page {
+    margin: 2cm;
+  }
+
+  article {
+    page-break-after: always;
+  }
+
+  a[target="_blank"]::after {
+    content: " (" attr(href) ")";
+    font-size: 8pt;
+    color: #666;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   ANIMATIONS
+═══════════════════════════════════════════════════════════════ */
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.lookbook-fade-in {
+  animation: fadeIn 0.6s ease-out forwards;
+}
+
+/* Reduce motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+.dark {
+  --background: oklch(0.145 0 0);
+  --foreground: oklch(0.985 0 0);
+  --card: oklch(0.205 0 0);
+  --card-foreground: oklch(0.985 0 0);
+  --popover: oklch(0.205 0 0);
+  --popover-foreground: oklch(0.985 0 0);
+  --primary: oklch(0.922 0 0);
+  --primary-foreground: oklch(0.205 0 0);
+  --secondary: oklch(0.269 0 0);
+  --secondary-foreground: oklch(0.985 0 0);
+  --muted: oklch(0.269 0 0);
+  --muted-foreground: oklch(0.708 0 0);
+  --accent: oklch(0.269 0 0);
+  --accent-foreground: oklch(0.985 0 0);
+  --destructive: oklch(0.704 0.191 22.216);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: oklch(0.556 0 0);
+  --chart-1: oklch(0.488 0.243 264.376);
+  --chart-2: oklch(0.696 0.17 162.48);
+  --chart-3: oklch(0.769 0.188 70.08);
+  --chart-4: oklch(0.627 0.265 303.9);
+  --chart-5: oklch(0.645 0.246 16.439);
+  --sidebar: oklch(0.205 0 0);
+  --sidebar-foreground: oklch(0.985 0 0);
+  --sidebar-primary: oklch(0.488 0.243 264.376);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.269 0 0);
+  --sidebar-accent-foreground: oklch(0.985 0 0);
+  --sidebar-border: oklch(1 0 0 / 10%);
+  --sidebar-ring: oklch(0.556 0 0);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
 }
