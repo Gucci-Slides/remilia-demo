@@ -1,0 +1,656 @@
+/* ═══════════════════════════════════════════════════════════════════════════════
+   ARCHIVE INDEX STYLES
+   
+   Paper-native styling for the archive document system.
+   Implements the "paper document rendered with CSS" aesthetic.
+═══════════════════════════════════════════════════════════════════════════════ */
+
+/* ─────────────────────────────────────────────────────────────────────────────────
+   TOKENS — Archive-specific
+───────────────────────────────────────────────────────────────────────────────── */
+
+:root {
+  /* Paper */
+  --paper: #f5f2eb;
+  --paper-warm: #faf8f3;
+  
+  /* Ink levels (warm charcoal) */
+  --ink: rgba(18, 16, 14, 0.92);
+  --ink-2: rgba(18, 16, 14, 0.62);
+  --ink-3: rgba(18, 16, 14, 0.38);
+  --ink-4: rgba(18, 16, 14, 0.22);
+  
+  /* Rules */
+  --rule: rgba(18, 16, 14, 0.10);
+  --grid: rgba(18, 16, 14, 0.06);
+  
+  /* Status colors */
+  --status-active: rgba(40, 90, 40, 0.72);
+  --status-draft: rgba(140, 100, 30, 0.72);
+  --status-superseded: rgba(140, 50, 50, 0.65);
+  --status-withdrawn: rgba(80, 80, 80, 0.55);
+  
+  /* Type scale (root=16, ratio=1.25) */
+  --t00: 10px;   /* micro */
+  --t01: 12px;   /* label */
+  --t02: 16px;   /* archive */
+  --t03: 20px;   /* state */
+  --t04: clamp(32px, 3.2vw, 40px); /* monument */
+  
+  /* Page dimensions */
+  --archive-page-width: min(820px, 94vw);
+  --archive-margin-x: clamp(32px, 5vw, 56px);
+  --archive-margin-y: clamp(40px, 6vh, 64px);
+  --archive-page-gap: 56px;
+  
+  /* Crop marks */
+  --crop-offset: clamp(16px, 2.5vw, 28px);
+  --crop-length: 12px;
+  --crop-color: rgba(18, 16, 14, 0.10);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────────
+   ARCHIVE CONTAINER — Paper field
+───────────────────────────────────────────────────────────────────────────────── */
+
+.archive-container {
+  min-height: 100vh;
+  min-height: 100dvh;
+  background: var(--paper);
+  color-scheme: light only;
+  
+  /* Paper texture */
+  background-image:
+    radial-gradient(
+      ellipse 80% 60% at 50% 45%,
+      var(--paper-warm) 0%,
+      transparent 70%
+    ),
+    radial-gradient(
+      ellipse 120% 100% at 50% 50%,
+      transparent 40%,
+      rgba(30, 25, 20, 0.025) 80%,
+      rgba(25, 20, 15, 0.04) 100%
+    );
+  
+  /* Grain overlay */
+  position: relative;
+}
+
+.archive-container::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  mix-blend-mode: multiply;
+  background-image:
+    repeating-linear-gradient(
+      0deg,
+      transparent 0px,
+      transparent 2px,
+      rgba(120, 110, 100, 0.015) 2px,
+      transparent 3px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      transparent 0px,
+      transparent 3px,
+      rgba(100, 95, 85, 0.010) 3px,
+      transparent 4px
+    );
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────────
+   ARCHIVE PAGE FRAME — Individual page
+───────────────────────────────────────────────────────────────────────────────── */
+
+.archive-page-frame {
+  position: relative;
+  width: var(--archive-page-width);
+  max-width: 100%;
+  margin: 0 auto;
+  padding: var(--archive-margin-y) var(--archive-margin-x);
+  min-height: 100vh;
+  min-height: 100dvh;
+  
+  /* Page separation */
+  margin-bottom: var(--archive-page-gap);
+}
+
+.archive-page-frame:last-child {
+  margin-bottom: 0;
+}
+
+/* Active page subtle emphasis */
+.archive-page-frame--active {
+  /* Very subtle, almost imperceptible */
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────────
+   CROP MARKS — Corners
+───────────────────────────────────────────────────────────────────────────────── */
+
+.archive-crop-marks {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.archive-crop-mark {
+  position: absolute;
+}
+
+.archive-crop-mark::before {
+  content: '';
+  position: absolute;
+  width: var(--crop-length);
+  height: 1px;
+  background: var(--crop-color);
+}
+
+.archive-crop-mark::after {
+  content: '';
+  position: absolute;
+  width: 1px;
+  height: var(--crop-length);
+  background: var(--crop-color);
+}
+
+.archive-crop-mark--tl {
+  top: var(--crop-offset);
+  left: var(--crop-offset);
+}
+.archive-crop-mark--tl::before { top: 0; left: 0; }
+.archive-crop-mark--tl::after { top: 0; left: 0; }
+
+.archive-crop-mark--tr {
+  top: var(--crop-offset);
+  right: var(--crop-offset);
+}
+.archive-crop-mark--tr::before { top: 0; right: 0; }
+.archive-crop-mark--tr::after { top: 0; right: 0; }
+
+.archive-crop-mark--br {
+  bottom: var(--crop-offset);
+  right: var(--crop-offset);
+}
+.archive-crop-mark--br::before { bottom: 0; right: 0; }
+.archive-crop-mark--br::after { bottom: 0; right: 0; }
+
+.archive-crop-mark--bl {
+  bottom: var(--crop-offset);
+  left: var(--crop-offset);
+}
+.archive-crop-mark--bl::before { bottom: 0; left: 0; }
+.archive-crop-mark--bl::after { bottom: 0; left: 0; }
+
+/* ─────────────────────────────────────────────────────────────────────────────────
+   RIGHT VERTICAL RULE
+───────────────────────────────────────────────────────────────────────────────── */
+
+.archive-right-rule {
+  position: absolute;
+  right: calc(var(--archive-margin-x) + 80px);
+  top: var(--archive-margin-y);
+  bottom: var(--archive-margin-y);
+  width: 1px;
+  background: var(--grid);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────────
+   PAGE HEADER — Top center
+───────────────────────────────────────────────────────────────────────────────── */
+
+.archive-page-header {
+  position: absolute;
+  top: var(--archive-margin-y);
+  left: 50%;
+  transform: translateX(-50%);
+  
+  font-family: var(--font-label);
+  font-size: var(--t00);
+  font-weight: 400;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-4);
+}
+
+.archive-page-number {
+  /* Inherits from parent */
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────────
+   LEFT STAMP — Document identifier
+───────────────────────────────────────────────────────────────────────────────── */
+
+.archive-left-stamp {
+  position: absolute;
+  top: var(--archive-margin-y);
+  left: var(--archive-margin-x);
+  
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.archive-left-stamp-line {
+  font-family: var(--font-label);
+  font-size: var(--t00);
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  line-height: 1.6;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────────
+   PAGE CONTENT
+───────────────────────────────────────────────────────────────────────────────── */
+
+.archive-page-content {
+  position: relative;
+  padding-top: calc(var(--baseline-unit, 8px) * 8);
+  padding-bottom: calc(var(--baseline-unit, 8px) * 8);
+  min-height: calc(100vh - var(--archive-margin-y) * 2 - 120px);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────────
+   PAGE FOOTER
+───────────────────────────────────────────────────────────────────────────────── */
+
+.archive-page-footer {
+  position: absolute;
+  bottom: var(--archive-margin-y);
+  left: var(--archive-margin-x);
+  right: var(--archive-margin-x);
+  
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding-top: calc(var(--baseline-unit, 8px) * 2);
+  border-top: 1px solid var(--grid);
+}
+
+.archive-page-footer-left,
+.archive-page-footer-right {
+  font-family: var(--font-label);
+  font-size: var(--t00);
+  font-weight: 400;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────────
+   ARCHIVE COVER HEADER — Index cover block
+───────────────────────────────────────────────────────────────────────────────── */
+
+.archive-cover-header {
+  padding-bottom: calc(var(--baseline-unit, 8px) * 4);
+}
+
+.archive-cover-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-bottom: calc(var(--baseline-unit, 8px) * 5);
+}
+
+.archive-cover-meta-line {
+  font-family: var(--font-label);
+  font-size: var(--t00);
+  font-weight: 400;
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  line-height: 1.6;
+}
+
+.archive-cover-title {
+  font-family: var(--font-grotesk);
+  font-size: var(--t04);
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink);
+  line-height: 1.0;
+  margin-bottom: calc(var(--baseline-unit, 8px) * 3);
+  
+  -webkit-font-smoothing: antialiased;
+  text-shadow: 0 0 0.5px rgba(18, 16, 14, 0.12);
+}
+
+.archive-cover-status {
+  display: flex;
+  flex-wrap: wrap;
+  gap: calc(var(--baseline-unit, 8px) * 3);
+}
+
+.archive-cover-status-item {
+  font-family: var(--font-label);
+  font-size: var(--t01);
+  font-weight: 500;
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+}
+
+.archive-cover-divider {
+  height: 1px;
+  background: var(--rule);
+  margin-top: calc(var(--baseline-unit, 8px) * 4);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────────
+   ARCHIVE TABLE — Document index
+───────────────────────────────────────────────────────────────────────────────── */
+
+.archive-table {
+  margin-top: calc(var(--baseline-unit, 8px) * 4);
+}
+
+.archive-table-row {
+  display: grid;
+  grid-template-columns: 56px 1fr auto auto auto auto;
+  gap: calc(var(--baseline-unit, 8px) * 1.5);
+  align-items: baseline;
+  padding: calc(var(--baseline-unit, 8px) * 1.5) 0;
+  border-bottom: 1px solid var(--grid);
+  text-decoration: none;
+  transition: background-color 80ms ease;
+  position: relative;
+}
+
+.archive-table-row:hover {
+  background-color: rgba(18, 16, 14, 0.012);
+}
+
+.archive-table-row:hover .archive-table-title {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  color: var(--ink);
+}
+
+/* Variant rows (indented, lighter) */
+.archive-table-row--variant {
+  padding-left: calc(var(--baseline-unit, 8px) * 2);
+}
+
+/* Demoted rows (superseded, withdrawn) */
+.archive-table-row--demoted {
+  opacity: 0.7;
+}
+
+.archive-table-row--demoted .archive-table-title,
+.archive-table-row--demoted .archive-table-docid {
+  color: var(--ink-3);
+}
+
+/* DOC ID */
+.archive-table-docid {
+  font-family: var(--font-label);
+  font-size: var(--t00);
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+}
+
+.archive-table-indent {
+  color: var(--ink-4);
+  margin-right: 4px;
+}
+
+/* TITLE */
+.archive-table-title-cell {
+  display: flex;
+  align-items: baseline;
+  gap: calc(var(--baseline-unit, 8px) * 1);
+  overflow: hidden;
+  min-width: 0;
+}
+
+.archive-table-title {
+  font-family: var(--font-grotesk);
+  font-size: var(--t02);
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  color: var(--ink-2);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 280px;
+  transition: color 80ms ease;
+}
+
+/* Dotted leader */
+.archive-table-leader {
+  flex: 1;
+  border-bottom: 1px dotted var(--rule);
+  min-width: 16px;
+  margin: 0 8px;
+  position: relative;
+  top: -3px;
+}
+
+/* REV */
+.archive-table-rev {
+  font-family: var(--font-label);
+  font-size: var(--t00);
+  font-weight: 400;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  min-width: 48px;
+  text-align: right;
+}
+
+/* STATUS */
+.archive-table-status {
+  font-family: var(--font-label);
+  font-size: var(--t01);
+  font-weight: 500;
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+  min-width: 80px;
+  text-align: center;
+}
+
+.archive-table-status.status--active {
+  color: var(--status-active);
+}
+
+.archive-table-status.status--draft {
+  color: var(--status-draft);
+}
+
+.archive-table-status.status--superseded {
+  color: var(--status-superseded);
+}
+
+.archive-table-status.status--withdrawn {
+  color: var(--status-withdrawn);
+}
+
+/* DATE */
+.archive-table-date {
+  font-family: var(--font-label);
+  font-size: var(--t00);
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  color: var(--ink-3);
+  min-width: 72px;
+  text-align: right;
+}
+
+/* REF */
+.archive-table-ref {
+  font-family: var(--font-label);
+  font-size: var(--t00);
+  font-weight: 400;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-4);
+  min-width: 48px;
+  text-align: right;
+}
+
+/* Superseded notice */
+.archive-table-superseded {
+  grid-column: 2 / -1;
+  font-family: var(--font-label);
+  font-size: var(--t00);
+  font-weight: 400;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--status-superseded);
+  padding-top: 2px;
+  opacity: 0.8;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────────
+   RIGHT MARGIN REFS — Document chain
+───────────────────────────────────────────────────────────────────────────────── */
+
+.archive-margin-refs {
+  position: absolute;
+  top: calc(var(--archive-margin-y) + 64px);
+  right: var(--archive-margin-x);
+  width: 64px;
+  
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  text-align: right;
+}
+
+.archive-margin-ref {
+  font-family: var(--font-label);
+  font-size: var(--t00);
+  font-weight: 400;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+
+.archive-margin-ref--current {
+  font-weight: 500;
+  color: var(--ink-2);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────────
+   RESPONSIVE — Tablet
+───────────────────────────────────────────────────────────────────────────────── */
+
+@media (max-width: 1023px) {
+  :root {
+    --archive-margin-x: clamp(24px, 4vw, 40px);
+  }
+  
+  .archive-right-rule {
+    right: calc(var(--archive-margin-x) + 48px);
+  }
+  
+  .archive-table-title {
+    max-width: 200px;
+  }
+  
+  .archive-margin-refs {
+    width: 48px;
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────────
+   RESPONSIVE — Mobile
+───────────────────────────────────────────────────────────────────────────────── */
+
+@media (max-width: 767px) {
+  :root {
+    --archive-margin-x: 16px;
+    --archive-margin-y: 32px;
+  }
+  
+  .archive-right-rule {
+    display: none;
+  }
+  
+  .archive-margin-refs {
+    display: none;
+  }
+  
+  .archive-table-row {
+    grid-template-columns: 1fr;
+    gap: 4px;
+    padding: calc(var(--baseline-unit, 8px) * 2) 0;
+  }
+  
+  .archive-table-title-cell {
+    order: 1;
+  }
+  
+  .archive-table-docid {
+    order: 2;
+  }
+  
+  .archive-table-leader {
+    display: none;
+  }
+  
+  .archive-table-title {
+    max-width: none;
+  }
+  
+  .archive-table-rev,
+  .archive-table-date {
+    display: inline-block;
+    min-width: auto;
+    text-align: left;
+    margin-right: 12px;
+  }
+  
+  .archive-table-ref {
+    display: none;
+  }
+  
+  .archive-crop-mark::before,
+  .archive-crop-mark::after {
+    opacity: 0.5;
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────────
+   ACCESSIBILITY — Reduced motion
+───────────────────────────────────────────────────────────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  .archive-table-row {
+    transition: none;
+  }
+  
+  .archive-table-title {
+    transition: none;
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────────
+   PRINT
+───────────────────────────────────────────────────────────────────────────────── */
+
+@media print {
+  .archive-container::before,
+  .archive-crop-marks,
+  .archive-right-rule,
+  .archive-margin-refs {
+    display: none;
+  }
+  
+  .archive-container {
+    background: white;
+  }
+  
+  .archive-page-frame {
+    page-break-after: always;
+  }
+}

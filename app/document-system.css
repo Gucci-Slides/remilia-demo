@@ -1,0 +1,292 @@
+/* ═══════════════════════════════════════════════════════════════════════════════
+   DOCUMENT SYSTEM — Reusable Typography Tier Tokens
+   
+   These tokens are the ONLY way to apply typography in document pages.
+   DO NOT use arbitrary Tailwind text utilities (text-[...], text-2xl, etc).
+   
+   TIER TOKEN CLASSES:
+   - t-monument  (04) — Highest authority, display headlines
+   - t-state     (03) — Section headers, numbered lists
+   - t-archive   (02) — Body text, definitions, descriptions
+   - t-label     (01) — Anchors, callouts, status indicators
+   - t-micro     (00) — Margin annotations, reference codes
+   
+   USAGE:
+   <h1 className="t-monument">REMILIA — SCOPE</h1>
+   <h2 className="t-state">1. DEFINITIONS</h2>
+   <p className="t-archive">Institution: a framework that outlives nodes.</p>
+   <span className="t-label">§1.0</span>
+   <span className="t-micro">REF: D1-1</span>
+═══════════════════════════════════════════════════════════════════════════════ */
+
+/* ─────────────────────────────────────────────────────────────────────────────────
+   TIER 04: t-monument — Highest Authority
+   
+   Use for: Primary document titles, single-word declarations
+   Case: UPPERCASE only
+   Ink: Highest density (--ink-04)
+───────────────────────────────────────────────────────────────────────────────── */
+
+.t-monument {
+  font-family: var(--font-grotesk);
+  font-size: var(--scale-04);
+  font-weight: 600;
+  font-stretch: 95%;
+  letter-spacing: var(--track-04);
+  line-height: 1.0;
+  text-transform: uppercase;
+  color: var(--ink-04);
+  
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  
+  /* Heavy ink spread */
+  text-shadow: 
+    0 0 0.5px rgba(18, 16, 14, 0.18),
+    0 0 0.8px rgba(18, 16, 14, 0.10);
+  
+  /* Spacing */
+  margin: 0;
+  padding: 0;
+}
+
+/* Monument with narrower scope (inline use) */
+.t-monument--inline {
+  font-size: clamp(28px, 2.8vw, 36px);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────────
+   TIER 03: t-state — Section Headers
+   
+   Use for: Numbered section headers, list items, declarations
+   Case: UPPERCASE
+   Ink: Normal density (--ink-03)
+───────────────────────────────────────────────────────────────────────────────── */
+
+.t-state {
+  font-family: var(--font-grotesk);
+  font-size: var(--scale-03);
+  font-weight: 500;
+  letter-spacing: var(--track-03);
+  line-height: 1.15;
+  text-transform: uppercase;
+  color: var(--ink-03);
+  
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  
+  /* Crisp, minimal spread */
+  text-shadow: 
+    0 0 0.3px rgba(18, 16, 14, 0.10),
+    0 0 0.5px rgba(18, 16, 14, 0.05);
+  
+  /* Spacing */
+  margin: 0;
+  padding: 0;
+}
+
+/* State with baseline spacing for lists */
+.t-state--list {
+  padding-top: calc(var(--baseline-unit) * 3);
+  padding-bottom: calc(var(--baseline-unit) * 1);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────────
+   TIER 02: t-archive — Body Text & Definitions
+   
+   Use for: Paragraph text, definitions, descriptions
+   Case: Sentence case
+   Ink: Lighter (--ink-02)
+───────────────────────────────────────────────────────────────────────────────── */
+
+.t-archive {
+  font-family: var(--font-archive-serif);
+  font-size: var(--scale-02);
+  font-weight: 400;
+  letter-spacing: var(--track-02);
+  line-height: 1.5;
+  color: var(--ink-02);
+  
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  
+  /* Light ink spread */
+  text-shadow: 
+    0 0 0.3px rgba(18, 16, 14, 0.08),
+    0 0 0.45px rgba(18, 16, 14, 0.04);
+  
+  /* Spacing */
+  margin: 0;
+  padding: 0;
+}
+
+/* Archive as list item (definition) */
+.t-archive--def {
+  padding-left: calc(var(--baseline-unit) * 2);
+  padding-top: calc(var(--baseline-unit) * 0.5);
+  padding-bottom: calc(var(--baseline-unit) * 0.5);
+  position: relative;
+}
+
+/* Definition bullet/dash */
+.t-archive--def::before {
+  content: '—';
+  position: absolute;
+  left: 0;
+  color: var(--ink-01);
+}
+
+/* Archive as paragraph block */
+.t-archive--block {
+  max-width: 48ch;
+  padding-top: calc(var(--baseline-unit) * 1);
+  padding-bottom: calc(var(--baseline-unit) * 1);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────────
+   TIER 01: t-label — Anchors & Callouts
+   
+   Use for: Section anchors (§1.0), status tags, callouts
+   Case: UPPERCASE
+   Ink: Lighter still (--ink-01)
+───────────────────────────────────────────────────────────────────────────────── */
+
+.t-label {
+  font-family: var(--font-label);
+  font-size: var(--scale-01);
+  font-weight: 500;
+  letter-spacing: var(--track-01);
+  line-height: 1.4;
+  text-transform: uppercase;
+  color: var(--ink-01);
+  
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  
+  /* Minimal ink spread */
+  text-shadow: 0 0 0.25px rgba(18, 16, 14, 0.06);
+  
+  /* Spacing */
+  margin: 0;
+  padding: 0;
+}
+
+/* Label as inline anchor */
+.t-label--anchor {
+  display: inline-block;
+  min-width: 48px;
+  margin-right: calc(var(--baseline-unit) * 2);
+}
+
+/* Label as status tag */
+.t-label--status {
+  padding: calc(var(--baseline-unit) * 0.5) 0;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────────
+   TIER 00: t-micro — Margin Annotations
+   
+   Use for: Reference codes, margin notes, timestamps
+   Case: UPPERCASE
+   Ink: Lightest (--ink-00)
+───────────────────────────────────────────────────────────────────────────────── */
+
+.t-micro {
+  font-family: var(--font-label);
+  font-size: var(--scale-00);
+  font-weight: 400;
+  letter-spacing: var(--track-00);
+  line-height: 1.4;
+  text-transform: uppercase;
+  color: var(--ink-00);
+  
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  
+  /* Almost no spread — under-inked */
+  text-shadow: 0 0 0.2px rgba(18, 16, 14, 0.04);
+  
+  /* Spacing */
+  margin: 0;
+  padding: 0;
+}
+
+/* Micro as margin annotation (right-aligned) */
+.t-micro--margin {
+  text-align: right;
+  padding-left: calc(var(--baseline-unit) * 2);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────────
+   DOCUMENT CONTENT STRUCTURE
+───────────────────────────────────────────────────────────────────────────────── */
+
+/* Main content column */
+.document-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding-top: calc(var(--baseline-unit) * 6);
+  padding-bottom: calc(var(--baseline-unit) * 6);
+}
+
+/* Section wrapper with baseline grid alignment */
+.document-section {
+  position: relative;
+  padding-top: calc(var(--baseline-unit) * 4);
+  padding-bottom: calc(var(--baseline-unit) * 2);
+}
+
+/* Section with right margin annotation */
+.document-section--annotated {
+  display: grid;
+  grid-template-columns: 1fr 64px;
+  gap: calc(var(--baseline-unit) * 3);
+  align-items: start;
+}
+
+/* Definitions list */
+.document-definitions {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  padding-left: calc(var(--baseline-unit) * 3);
+}
+
+/* Status block */
+.document-status {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--baseline-unit) * 1);
+  padding-top: calc(var(--baseline-unit) * 4);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────────
+   DOCUMENT LINK — Archive navigation (not a button)
+───────────────────────────────────────────────────────────────────────────────── */
+
+.document-link {
+  font-family: var(--font-label);
+  font-size: var(--scale-00);
+  font-weight: 400;
+  letter-spacing: var(--track-00);
+  line-height: 1.4;
+  text-transform: uppercase;
+  color: var(--ink-00);
+  text-decoration: none;
+  
+  /* Under-inked appearance */
+  text-shadow: 0 0 0.2px rgba(18, 16, 14, 0.04);
+  
+  /* No hover glow, just subtle opacity shift */
+  transition: color 0.2s ease;
+}
+
+.document-link:hover {
+  color: var(--ink-01);
+}
+
+.document-link:focus {
+  outline: 1px dotted var(--rule);
+  outline-offset: 4px;
+}

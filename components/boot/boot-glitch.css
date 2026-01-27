@@ -1,0 +1,438 @@
+/* ═══════════════════════════════════════════════════════════════════════════════
+   BOOT GLITCH — CRT glitch transition effects
+   
+   Timeline (900ms total):
+   - t=0ms:    glitch-on (intensify scanlines, start jitter)
+   - t=140ms:  glitch-flash (white flash, 60ms)
+   - t=260ms:  glitch-tear (horizontal tears, 200ms)
+   - t=520ms:  glitch-collapse (vertical line collapse, 90ms)
+   - t=650ms:  fade to black (250ms)
+   - t=900ms:  complete -> navigate
+═══════════════════════════════════════════════════════════════════════════════ */
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   BASE LAYER STYLES
+───────────────────────────────────────────────────────────────────────────── */
+.glitch-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.05s ease;
+}
+
+.glitch-overlay--active {
+  opacity: 1;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   SCANLINES — Intensified during glitch
+───────────────────────────────────────────────────────────────────────────── */
+.glitch-scanlines {
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0) 0px,
+    rgba(0, 0, 0, 0) 1px,
+    rgba(0, 0, 0, 0.4) 1px,
+    rgba(0, 0, 0, 0.4) 2px
+  );
+  background-size: 100% 4px;
+  opacity: 0;
+  transition: opacity 0.05s ease;
+}
+
+.glitch-scanlines--hard {
+  opacity: 1;
+  animation: scanlines-hard 0.08s steps(2) infinite;
+}
+
+@keyframes scanlines-hard {
+  0% {
+    background-position: 0 0;
+    opacity: 0.9;
+  }
+  50% {
+    background-position: 0 2px;
+    opacity: 1;
+  }
+  100% {
+    background-position: 0 0;
+    opacity: 0.9;
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   JITTER — Screen shake effect
+───────────────────────────────────────────────────────────────────────────── */
+.glitch-jitter {
+  animation: crt-jitter 0.05s steps(2) infinite;
+}
+
+@keyframes crt-jitter {
+  0% {
+    transform: translate(0, 0);
+  }
+  25% {
+    transform: translate(-3px, 1px);
+  }
+  50% {
+    transform: translate(2px, -1px);
+  }
+  75% {
+    transform: translate(-1px, 2px);
+  }
+  100% {
+    transform: translate(1px, -1px);
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   RGB SPLIT — Chromatic aberration
+───────────────────────────────────────────────────────────────────────────── */
+.glitch-rgb-split {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.glitch-rgb-split--active {
+  animation: rgb-split 0.1s steps(3) infinite;
+}
+
+@keyframes rgb-split {
+  0% {
+    box-shadow: 
+      inset -4px 0 0 rgba(255, 0, 0, 0.3),
+      inset 4px 0 0 rgba(0, 255, 255, 0.3);
+  }
+  33% {
+    box-shadow: 
+      inset -6px 0 0 rgba(255, 0, 0, 0.4),
+      inset 6px 0 0 rgba(0, 255, 255, 0.4);
+  }
+  66% {
+    box-shadow: 
+      inset -3px 0 0 rgba(255, 0, 0, 0.35),
+      inset 3px 0 0 rgba(0, 255, 255, 0.35);
+  }
+  100% {
+    box-shadow: 
+      inset -5px 0 0 rgba(255, 0, 0, 0.3),
+      inset 5px 0 0 rgba(0, 255, 255, 0.3);
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   WHITE FLASH — Brief flash overlay
+───────────────────────────────────────────────────────────────────────────── */
+.glitch-flash {
+  position: absolute;
+  inset: 0;
+  background: #fff;
+  opacity: 0;
+  mix-blend-mode: screen;
+  pointer-events: none;
+}
+
+.glitch-flash--active {
+  animation: white-flash 0.06s ease-out forwards;
+}
+
+@keyframes white-flash {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.8;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   TEAR BARS — Horizontal displacement
+───────────────────────────────────────────────────────────────────────────── */
+.glitch-tear {
+  position: absolute;
+  left: -10%;
+  width: 120%;
+  background: rgba(255, 255, 255, 0.1);
+  pointer-events: none;
+  opacity: 0;
+}
+
+.glitch-tear--active {
+  opacity: 1;
+}
+
+.glitch-tear-1 {
+  top: 15%;
+  height: 18px;
+  animation: tear-slide-1 0.2s steps(4) forwards;
+}
+
+.glitch-tear-2 {
+  top: 35%;
+  height: 32px;
+  animation: tear-slide-2 0.2s steps(5) forwards;
+}
+
+.glitch-tear-3 {
+  top: 52%;
+  height: 24px;
+  animation: tear-slide-3 0.2s steps(3) forwards;
+}
+
+.glitch-tear-4 {
+  top: 70%;
+  height: 14px;
+  animation: tear-slide-4 0.2s steps(4) forwards;
+}
+
+.glitch-tear-5 {
+  top: 88%;
+  height: 28px;
+  animation: tear-slide-5 0.2s steps(5) forwards;
+}
+
+@keyframes tear-slide-1 {
+  0% { transform: translateX(0); }
+  25% { transform: translateX(40px); }
+  50% { transform: translateX(-20px); }
+  75% { transform: translateX(15px); }
+  100% { transform: translateX(0); opacity: 0; }
+}
+
+@keyframes tear-slide-2 {
+  0% { transform: translateX(0); }
+  20% { transform: translateX(-50px); }
+  40% { transform: translateX(30px); }
+  60% { transform: translateX(-25px); }
+  80% { transform: translateX(10px); }
+  100% { transform: translateX(0); opacity: 0; }
+}
+
+@keyframes tear-slide-3 {
+  0% { transform: translateX(0); }
+  33% { transform: translateX(60px); }
+  66% { transform: translateX(-40px); }
+  100% { transform: translateX(0); opacity: 0; }
+}
+
+@keyframes tear-slide-4 {
+  0% { transform: translateX(0); }
+  25% { transform: translateX(-35px); }
+  50% { transform: translateX(45px); }
+  75% { transform: translateX(-15px); }
+  100% { transform: translateX(0); opacity: 0; }
+}
+
+@keyframes tear-slide-5 {
+  0% { transform: translateX(0); }
+  20% { transform: translateX(55px); }
+  40% { transform: translateX(-30px); }
+  60% { transform: translateX(20px); }
+  80% { transform: translateX(-10px); }
+  100% { transform: translateX(0); opacity: 0; }
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   VERTICAL ROLL — Simulates signal roll
+───────────────────────────────────────────────────────────────────────────── */
+.glitch-roll {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to bottom,
+    transparent 0%,
+    transparent 45%,
+    rgba(255, 255, 255, 0.1) 48%,
+    rgba(0, 0, 0, 0.3) 52%,
+    transparent 55%,
+    transparent 100%
+  );
+  opacity: 0;
+  pointer-events: none;
+}
+
+.glitch-roll--active {
+  opacity: 1;
+  animation: vertical-roll 0.3s ease-out forwards;
+}
+
+@keyframes vertical-roll {
+  0% {
+    transform: translateY(-100%);
+  }
+  100% {
+    transform: translateY(100%);
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   COLLAPSE LINE — Power off/on effect
+───────────────────────────────────────────────────────────────────────────── */
+.glitch-collapse {
+  position: absolute;
+  inset: 0;
+  background: #000;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.glitch-collapse--active {
+  animation: collapse-effect 0.09s ease-in-out forwards;
+}
+
+@keyframes collapse-effect {
+  0% {
+    opacity: 1;
+    clip-path: inset(0 0 0 0);
+  }
+  40% {
+    opacity: 1;
+    clip-path: inset(49% 0 49% 0);
+  }
+  60% {
+    opacity: 1;
+    clip-path: inset(49.5% 0 49.5% 0);
+  }
+  100% {
+    opacity: 1;
+    clip-path: inset(50% 0 50% 0);
+  }
+}
+
+/* Collapse line glow */
+.glitch-collapse-line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 2px;
+  background: #00ff41;
+  box-shadow: 
+    0 0 10px #00ff41,
+    0 0 20px #00ff41,
+    0 0 40px #00ff41;
+  transform: translateY(-50%) scaleX(0);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.glitch-collapse-line--active {
+  animation: collapse-line 0.09s ease-out forwards;
+}
+
+@keyframes collapse-line {
+  0% {
+    opacity: 1;
+    transform: translateY(-50%) scaleX(0);
+  }
+  30% {
+    opacity: 1;
+    transform: translateY(-50%) scaleX(1);
+  }
+  70% {
+    opacity: 1;
+    transform: translateY(-50%) scaleX(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-50%) scaleX(0.5);
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   FADE TO BLACK — Final transition
+───────────────────────────────────────────────────────────────────────────── */
+.glitch-fade-black {
+  position: absolute;
+  inset: 0;
+  background: #000;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease-in;
+}
+
+.glitch-fade-black--active {
+  opacity: 1;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   NOISE LAYER — Static grain
+───────────────────────────────────────────────────────────────────────────── */
+.glitch-noise {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+.glitch-noise--active {
+  opacity: 0.15;
+  animation: noise-flicker 0.05s steps(3) infinite;
+}
+
+@keyframes noise-flicker {
+  0%, 100% {
+    opacity: 0.1;
+    transform: translate(0, 0);
+  }
+  33% {
+    opacity: 0.2;
+    transform: translate(-2px, 1px);
+  }
+  66% {
+    opacity: 0.15;
+    transform: translate(1px, -1px);
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   SMILEY CLICKABLE AREA
+───────────────────────────────────────────────────────────────────────────── */
+.boot-smiley-clickable {
+  cursor: pointer;
+  pointer-events: auto;
+  transition: transform 0.1s ease;
+}
+
+.boot-smiley-clickable:hover {
+  transform: scale(1.02);
+}
+
+.boot-smiley-clickable:active {
+  transform: scale(0.98);
+}
+
+.boot-smiley-clickable--frozen {
+  cursor: default;
+  pointer-events: none;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   REDUCED MOTION
+───────────────────────────────────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .glitch-jitter,
+  .glitch-scanlines--hard,
+  .glitch-rgb-split--active,
+  .glitch-flash--active,
+  .glitch-tear--active,
+  .glitch-roll--active,
+  .glitch-collapse--active,
+  .glitch-collapse-line--active,
+  .glitch-noise--active {
+    animation: none;
+  }
+  
+  .glitch-fade-black--active {
+    transition-duration: 0.1s;
+  }
+}

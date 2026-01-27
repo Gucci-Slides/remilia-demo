@@ -1,0 +1,708 @@
+/* ═══════════════════════════════════════════════════════════════════════════════
+   ARCHIVE DOCUMENT SYSTEM — Styles
+   
+   Paper texture, ink rules, and typographic scale for archival documents.
+   Implements the "printed document that got CSS" aesthetic.
+═══════════════════════════════════════════════════════════════════════════════ */
+
+/* ─────────────────────────────────────────────────────────────────────────────────
+   ROOT TOKENS — Ink & Paper System
+───────────────────────────────────────────────────────────────────────────────── */
+
+:root {
+  /* Paper tones */
+  --archive-paper-base: #f5f2eb;
+  --archive-paper-warmth: #faf8f3;
+  --archive-paper-shadow: rgba(45, 40, 35, 0.04);
+  
+  /* Ink levels (warm charcoal, not pure black) */
+  --archive-ink-strong: rgba(20, 20, 20, 0.92);
+  --archive-ink-mid: rgba(20, 20, 20, 0.68);
+  --archive-ink-light: rgba(20, 20, 20, 0.42);
+  --archive-ink-faint: rgba(20, 20, 20, 0.22);
+  --archive-rule-lines: rgba(20, 20, 20, 0.10);
+  
+  /* Superseded overlay */
+  --archive-superseded-ink: rgba(180, 60, 60, 0.12);
+  --archive-superseded-text: rgba(180, 60, 60, 0.45);
+  
+  /* Typography scale (1.25 ratio) */
+  --archive-root: 16px;
+  --archive-ratio: 1.25;
+  --archive-scale-04: clamp(38px, 3.6vw, 48px);  /* MONUMENT */
+  --archive-scale-03: clamp(18px, 2vw, 22px);     /* STATE */
+  --archive-scale-02: clamp(14px, 1.2vw, 16px);   /* ARCHIVE */
+  --archive-scale-01: clamp(10px, 1vw, 12px);     /* LABEL */
+  --archive-scale-00: clamp(9px, 0.9vw, 10px);    /* MICRO */
+  
+  /* Baseline */
+  --archive-baseline: 8px;
+  --archive-line-height: 1.55;
+  
+  /* Page dimensions */
+  --archive-page-width: min(720px, 90vw);
+  --archive-page-content-height: 720px;
+  --archive-page-margin-x: clamp(24px, 5vw, 48px);
+  --archive-page-margin-y: clamp(32px, 4vh, 48px);
+  --archive-margin-left: 64px;   /* § markers */
+  --archive-margin-right: 72px;  /* REF codes */
+  
+  /* Grain */
+  --archive-grain-a: 0.015;
+  --archive-grain-b: 0.010;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────────
+   PAPER SURFACE — Background with grain
+───────────────────────────────────────────────────────────────────────────────── */
+
+.archive-paper {
+  min-height: 100vh;
+  min-height: 100dvh;
+  background: var(--archive-paper-base);
+  
+  /* Subtle vignette */
+  background-image: 
+    radial-gradient(
+      ellipse 80% 60% at 50% 45%,
+      var(--archive-paper-warmth) 0%,
+      transparent 70%
+    ),
+    radial-gradient(
+      ellipse 120% 100% at 50% 50%,
+      transparent 40%,
+      rgba(30, 25, 20, 0.025) 80%,
+      rgba(25, 20, 15, 0.04) 100%
+    );
+  
+  /* Force light mode */
+  color-scheme: light only;
+}
+
+.archive-paper-grain {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  mix-blend-mode: multiply;
+  
+  /* Multi-layer grain pattern */
+  background-image:
+    repeating-linear-gradient(
+      0deg,
+      transparent 0px,
+      transparent 2px,
+      rgba(120, 110, 100, var(--archive-grain-a)) 2px,
+      transparent 3px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      transparent 0px,
+      transparent 3px,
+      rgba(100, 95, 85, var(--archive-grain-b)) 3px,
+      transparent 4px
+    );
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────────
+   PAGE FRAME — Individual page container
+───────────────────────────────────────────────────────────────────────────────── */
+
+.archive-page-frame {
+  position: relative;
+  width: var(--archive-page-width);
+  max-width: 100%;
+  margin: 0 auto;
+  padding: var(--archive-page-margin-y) var(--archive-page-margin-x);
+  
+  /* Page boundary */
+  border-bottom: 1px solid var(--archive-rule-lines);
+}
+
+.archive-page-frame:last-child {
+  border-bottom: none;
+}
+
+/* Page focus (subtle) */
+.archive-page-frame--focused {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────────
+   PAGE HEADER — Top bar with docCode, rev, page counter
+───────────────────────────────────────────────────────────────────────────────── */
+
+.archive-page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding-bottom: calc(var(--archive-baseline) * 3);
+  border-bottom: 1px solid var(--archive-rule-lines);
+  margin-bottom: calc(var(--archive-baseline) * 4);
+}
+
+.archive-page-header-left {
+  font-family: var(--font-label);
+  font-size: var(--archive-scale-00);
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--archive-ink-light);
+}
+
+.archive-page-header-center {
+  font-family: var(--font-label);
+  font-size: var(--archive-scale-00);
+  font-weight: 400;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--archive-ink-faint);
+}
+
+.archive-page-header-right {
+  font-family: var(--font-label);
+  font-size: var(--archive-scale-00);
+  font-weight: 400;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--archive-ink-light);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────────
+   PAGE FOOTER — Bottom bar with issuance
+───────────────────────────────────────────────────────────────────────────────── */
+
+.archive-page-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding-top: calc(var(--archive-baseline) * 3);
+  border-top: 1px solid var(--archive-rule-lines);
+  margin-top: calc(var(--archive-baseline) * 4);
+}
+
+.archive-page-footer-left {
+  font-family: var(--font-label);
+  font-size: var(--archive-scale-00);
+  font-weight: 400;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--archive-ink-light);
+}
+
+.archive-page-footer-right {
+  font-family: var(--font-label);
+  font-size: var(--archive-scale-00);
+  font-weight: 400;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--archive-ink-faint);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────────
+   CONTENT AREA — Main text with margins
+───────────────────────────────────────────────────────────────────────────────── */
+
+.archive-content {
+  position: relative;
+  padding-left: var(--archive-margin-left);
+  padding-right: var(--archive-margin-right);
+  min-height: 200px;
+}
+
+/* Left margin for § markers */
+.archive-content::before {
+  content: '';
+  position: absolute;
+  left: calc(var(--archive-margin-left) - 8px);
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: var(--archive-rule-lines);
+  opacity: 0.5;
+}
+
+/* Right margin rule */
+.archive-content::after {
+  content: '';
+  position: absolute;
+  right: calc(var(--archive-margin-right) - 8px);
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: var(--archive-rule-lines);
+  opacity: 0.5;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────────
+   TYPOGRAPHIC TIERS — Archive-specific
+───────────────────────────────────────────────────────────────────────────────── */
+
+/* MONUMENT — Primary title */
+.archive-monument {
+  font-family: var(--font-grotesk);
+  font-size: var(--archive-scale-04);
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  line-height: 1.0;
+  text-transform: uppercase;
+  color: var(--archive-ink-strong);
+  margin-bottom: calc(var(--archive-baseline) * 4);
+  
+  -webkit-font-smoothing: antialiased;
+  text-shadow: 0 0 0.5px rgba(20, 20, 20, 0.15);
+}
+
+/* STATE — Section headings */
+.archive-state {
+  font-family: var(--font-grotesk);
+  font-size: var(--archive-scale-03);
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  line-height: 1.2;
+  text-transform: uppercase;
+  color: var(--archive-ink-strong);
+  margin-top: calc(var(--archive-baseline) * 4);
+  margin-bottom: calc(var(--archive-baseline) * 2);
+  
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ARCHIVE — Body text */
+.archive-body {
+  font-family: var(--font-archive-serif);
+  font-size: var(--archive-scale-02);
+  font-weight: 400;
+  letter-spacing: -0.005em;
+  line-height: var(--archive-line-height);
+  color: var(--archive-ink-mid);
+  margin-bottom: calc(var(--archive-baseline) * 2);
+  max-width: 60ch;
+  
+  -webkit-font-smoothing: antialiased;
+}
+
+/* LABEL — Metadata, status */
+.archive-label {
+  font-family: var(--font-label);
+  font-size: var(--archive-scale-01);
+  font-weight: 500;
+  letter-spacing: 0.10em;
+  line-height: 1.4;
+  text-transform: uppercase;
+  color: var(--archive-ink-light);
+  
+  -webkit-font-smoothing: antialiased;
+}
+
+/* MICRO — Margin refs, page counter */
+.archive-micro {
+  font-family: var(--font-label);
+  font-size: var(--archive-scale-00);
+  font-weight: 400;
+  letter-spacing: 0.06em;
+  line-height: 1.4;
+  text-transform: uppercase;
+  color: var(--archive-ink-faint);
+  
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────────
+   SECTION MARKERS — § in left margin
+───────────────────────────────────────────────────────────────────────────────── */
+
+.archive-section-marker {
+  position: absolute;
+  left: 0;
+  width: calc(var(--archive-margin-left) - 16px);
+  text-align: right;
+  
+  font-family: var(--font-label);
+  font-size: var(--archive-scale-01);
+  font-weight: 400;
+  letter-spacing: 0.05em;
+  color: var(--archive-ink-light);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────────
+   MARGIN REFS — REF codes in right margin
+───────────────────────────────────────────────────────────────────────────────── */
+
+.archive-margin-ref {
+  position: absolute;
+  right: 0;
+  width: calc(var(--archive-margin-right) - 16px);
+  text-align: left;
+  
+  font-family: var(--font-label);
+  font-size: var(--archive-scale-00);
+  font-weight: 400;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--archive-ink-faint);
+  
+  cursor: pointer;
+  transition: color 100ms ease;
+}
+
+.archive-margin-ref:hover {
+  color: var(--archive-ink-light);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────────
+   DEFINITION LIST
+───────────────────────────────────────────────────────────────────────────────── */
+
+.archive-definition-list {
+  margin: calc(var(--archive-baseline) * 2) 0;
+  padding-left: calc(var(--archive-baseline) * 2);
+}
+
+.archive-definition-item {
+  display: flex;
+  gap: calc(var(--archive-baseline) * 2);
+  padding: calc(var(--archive-baseline) * 0.5) 0;
+}
+
+.archive-definition-term {
+  font-family: var(--font-label);
+  font-size: var(--archive-scale-02);
+  font-weight: 500;
+  color: var(--archive-ink-mid);
+  min-width: 120px;
+}
+
+.archive-definition-def {
+  font-family: var(--font-archive-serif);
+  font-size: var(--archive-scale-02);
+  font-weight: 400;
+  color: var(--archive-ink-mid);
+  flex: 1;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────────
+   RULE LIST
+───────────────────────────────────────────────────────────────────────────────── */
+
+.archive-rule-list {
+  margin: calc(var(--archive-baseline) * 2) 0;
+  padding-left: calc(var(--archive-baseline) * 3);
+}
+
+.archive-rule-item {
+  position: relative;
+  padding: calc(var(--archive-baseline) * 0.5) 0;
+  padding-left: calc(var(--archive-baseline) * 2);
+  
+  font-family: var(--font-archive-serif);
+  font-size: var(--archive-scale-02);
+  color: var(--archive-ink-mid);
+}
+
+.archive-rule-item::before {
+  content: '—';
+  position: absolute;
+  left: 0;
+  color: var(--archive-ink-light);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────────
+   CALLOUT
+───────────────────────────────────────────────────────────────────────────────── */
+
+.archive-callout {
+  display: flex;
+  gap: calc(var(--archive-baseline) * 1);
+  padding: calc(var(--archive-baseline) * 1) 0;
+}
+
+.archive-callout-label {
+  font-family: var(--font-label);
+  font-size: var(--archive-scale-01);
+  font-weight: 500;
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+  color: var(--archive-ink-light);
+}
+
+.archive-callout-value {
+  font-family: var(--font-label);
+  font-size: var(--archive-scale-01);
+  font-weight: 400;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--archive-ink-mid);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────────
+   NUMBERED SECTION
+───────────────────────────────────────────────────────────────────────────────── */
+
+.archive-numbered-section {
+  position: relative;
+  margin: calc(var(--archive-baseline) * 4) 0;
+}
+
+.archive-numbered-section-header {
+  display: flex;
+  align-items: baseline;
+  gap: calc(var(--archive-baseline) * 2);
+  margin-bottom: calc(var(--archive-baseline) * 2);
+}
+
+.archive-numbered-section-no {
+  font-family: var(--font-label);
+  font-size: var(--archive-scale-03);
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  color: var(--archive-ink-light);
+}
+
+.archive-numbered-section-title {
+  font-family: var(--font-grotesk);
+  font-size: var(--archive-scale-03);
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--archive-ink-strong);
+}
+
+.archive-numbered-section-body {
+  padding-left: calc(var(--archive-baseline) * 2);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────────
+   REVISION BADGE
+───────────────────────────────────────────────────────────────────────────────── */
+
+.archive-revision-badge {
+  display: inline-flex;
+  align-items: baseline;
+  gap: calc(var(--archive-baseline) * 1);
+  padding: calc(var(--archive-baseline) * 0.5) calc(var(--archive-baseline) * 1);
+  border: 1px solid var(--archive-rule-lines);
+}
+
+.archive-revision-badge-label {
+  font-family: var(--font-label);
+  font-size: var(--archive-scale-00);
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--archive-ink-light);
+}
+
+.archive-revision-badge-value {
+  font-family: var(--font-label);
+  font-size: var(--archive-scale-00);
+  font-weight: 400;
+  letter-spacing: 0.08em;
+  color: var(--archive-ink-mid);
+}
+
+/* Status variants */
+.archive-revision-badge--active {
+  border-color: rgba(60, 120, 60, 0.3);
+}
+
+.archive-revision-badge--draft {
+  border-color: rgba(120, 100, 60, 0.3);
+}
+
+.archive-revision-badge--superseded {
+  border-color: var(--archive-superseded-ink);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────────
+   SUPERSEDED OVERLAY
+───────────────────────────────────────────────────────────────────────────────── */
+
+.archive-superseded-overlay {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 50;
+  
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.archive-superseded-watermark {
+  font-family: var(--font-grotesk);
+  font-size: clamp(48px, 10vw, 120px);
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--archive-superseded-text);
+  transform: rotate(-15deg);
+  user-select: none;
+  
+  text-shadow: 
+    0 0 20px rgba(180, 60, 60, 0.05),
+    0 0 40px rgba(180, 60, 60, 0.03);
+}
+
+.archive-superseded-notice {
+  display: flex;
+  align-items: center;
+  gap: calc(var(--archive-baseline) * 2);
+  padding: calc(var(--archive-baseline) * 2);
+  margin-top: calc(var(--archive-baseline) * 2);
+  background: rgba(180, 60, 60, 0.04);
+  border-left: 2px solid var(--archive-superseded-ink);
+}
+
+.archive-superseded-notice-text {
+  font-family: var(--font-label);
+  font-size: var(--archive-scale-01);
+  font-weight: 500;
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+  color: var(--archive-superseded-text);
+}
+
+.archive-superseded-notice-link {
+  font-family: var(--font-label);
+  font-size: var(--archive-scale-01);
+  font-weight: 400;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--archive-superseded-text);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  pointer-events: auto;
+  cursor: pointer;
+}
+
+.archive-superseded-notice-link:hover {
+  color: rgba(180, 60, 60, 0.65);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────────
+   REVISION CHAIN — Right margin reference stack
+───────────────────────────────────────────────────────────────────────────────── */
+
+.archive-revision-chain {
+  position: fixed;
+  top: 50%;
+  right: calc(var(--archive-page-margin-x) + 16px);
+  transform: translateY(-50%);
+  
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--archive-baseline) * 1);
+  text-align: right;
+}
+
+.archive-revision-chain-item {
+  font-family: var(--font-label);
+  font-size: var(--archive-scale-00);
+  font-weight: 400;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  text-decoration: none;
+  transition: color 100ms ease;
+}
+
+.archive-revision-chain-item--current {
+  color: var(--archive-ink-light);
+  font-weight: 500;
+}
+
+.archive-revision-chain-item--supersedes {
+  color: var(--archive-ink-faint);
+}
+
+.archive-revision-chain-item--supersededBy {
+  color: var(--archive-superseded-text);
+  font-weight: 500;
+}
+
+.archive-revision-chain-item:hover {
+  color: var(--archive-ink-mid);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────────
+   REV NOTES — End section
+───────────────────────────────────────────────────────────────────────────────── */
+
+.archive-rev-notes {
+  margin-top: calc(var(--archive-baseline) * 6);
+  padding-top: calc(var(--archive-baseline) * 4);
+  border-top: 1px solid var(--archive-rule-lines);
+}
+
+.archive-rev-notes-title {
+  font-family: var(--font-label);
+  font-size: var(--archive-scale-01);
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--archive-ink-light);
+  margin-bottom: calc(var(--archive-baseline) * 2);
+}
+
+.archive-rev-notes-list {
+  padding-left: calc(var(--archive-baseline) * 2);
+}
+
+.archive-rev-notes-item {
+  font-family: var(--font-archive-serif);
+  font-size: var(--archive-scale-02);
+  color: var(--archive-ink-mid);
+  padding: calc(var(--archive-baseline) * 0.5) 0;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────────
+   RESPONSIVE — Mobile
+───────────────────────────────────────────────────────────────────────────────── */
+
+@media (max-width: 899px) {
+  :root {
+    --archive-margin-left: 32px;
+    --archive-margin-right: 0px;
+    --archive-page-margin-x: 16px;
+  }
+  
+  .archive-content::after {
+    display: none;
+  }
+  
+  .archive-margin-ref {
+    position: static;
+    display: block;
+    width: auto;
+    text-align: left;
+    margin-top: calc(var(--archive-baseline) * 1);
+  }
+  
+  .archive-revision-chain {
+    display: none;
+  }
+  
+  .archive-superseded-watermark {
+    font-size: clamp(32px, 8vw, 64px);
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────────
+   PRINT STYLES
+───────────────────────────────────────────────────────────────────────────────── */
+
+@media print {
+  .archive-paper-grain,
+  .archive-superseded-overlay,
+  .archive-revision-chain {
+    display: none;
+  }
+  
+  .archive-paper {
+    background: white;
+  }
+  
+  .archive-page-frame {
+    page-break-after: always;
+  }
+}

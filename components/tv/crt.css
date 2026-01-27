@@ -1,0 +1,429 @@
+/* ═══════════════════════════════════════════════════════════════════════════════
+   CRT TV EFFECTS — Analog television simulation
+   
+   Layers (bottom to top):
+   1. Screen content (children)
+   2. Smiley broadcast overlay
+   3. Scanlines
+   4. Vignette
+   5. Screen glare
+   6. Noise (optional)
+   
+   All overlays use pointer-events: none for click-through.
+═══════════════════════════════════════════════════════════════════════════════ */
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   TV FRAME — The outer bezel
+───────────────────────────────────────────────────────────────────────────── */
+.crt-tv-frame {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background: #0a0a0a;
+  overflow: hidden;
+}
+
+/* Optional bezel effect (disabled by default for full-bleed look) */
+.crt-tv-frame--bezel {
+  padding: clamp(8px, 1.5vw, 24px);
+  background: linear-gradient(
+    145deg,
+    #1a1a1a 0%,
+    #0d0d0d 50%,
+    #050505 100%
+  );
+  border-radius: clamp(8px, 2vw, 32px);
+  box-shadow:
+    inset 0 2px 4px rgba(255, 255, 255, 0.05),
+    inset 0 -2px 4px rgba(0, 0, 0, 0.8),
+    0 8px 32px rgba(0, 0, 0, 0.6);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   TV SCREEN — The glass area
+───────────────────────────────────────────────────────────────────────────── */
+.crt-tv-screen {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: #000;
+  
+  /* Glass curvature illusion */
+  border-radius: clamp(4px, 0.8vw, 12px);
+  
+  /* Inner shadow for depth */
+  box-shadow:
+    inset 0 0 60px rgba(0, 0, 0, 0.4),
+    inset 0 0 120px rgba(0, 0, 0, 0.2);
+}
+
+/* Slight barrel distortion illusion via perspective */
+.crt-tv-screen--curved {
+  transform: perspective(1000px) rotateX(0.5deg);
+  transform-origin: center center;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   SCREEN CONTENT — Where children are rendered
+───────────────────────────────────────────────────────────────────────────── */
+.crt-screen-content {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  
+  /* CRT color characteristics */
+  filter: saturate(1.1) contrast(1.12) brightness(1.02);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   SMILEY BROADCAST OVERLAY
+───────────────────────────────────────────────────────────────────────────── */
+.crt-smiley-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  padding-left: clamp(24px, 5vw, 80px);
+  overflow: hidden;
+}
+
+.crt-smiley-image {
+  width: clamp(200px, 40vw, 500px);
+  height: auto;
+  object-fit: contain;
+  
+  /* Horizontal stretch for broadcast feel */
+  transform-origin: left center;
+  
+  /* Slight blur for analog broadcast look */
+  filter: blur(0.5px) brightness(1.1);
+  
+  /* Default blend mode */
+  mix-blend-mode: screen;
+  
+  /* Smooth opacity transitions */
+  transition: opacity 0.4s ease-out;
+}
+
+/* Chromatic aberration duplicate for RGB split effect */
+.crt-smiley-chroma {
+  position: absolute;
+  opacity: 0.15;
+  filter: blur(1px);
+}
+
+.crt-smiley-chroma--red {
+  transform: translate(-2px, 0);
+  filter: blur(1px) hue-rotate(-30deg) saturate(2);
+  mix-blend-mode: screen;
+}
+
+.crt-smiley-chroma--blue {
+  transform: translate(2px, 0);
+  filter: blur(1px) hue-rotate(30deg) saturate(2);
+  mix-blend-mode: screen;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   SCANLINES
+───────────────────────────────────────────────────────────────────────────── */
+.crt-scanlines {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  pointer-events: none;
+  
+  background: repeating-linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0) 0px,
+    rgba(0, 0, 0, 0) 1px,
+    rgba(0, 0, 0, 0.3) 1px,
+    rgba(0, 0, 0, 0.3) 2px
+  );
+  background-size: 100% 4px;
+  
+  /* Animate subtle movement */
+  animation: crt-scanline-scroll 10s linear infinite;
+}
+
+@keyframes crt-scanline-scroll {
+  0% {
+    background-position: 0 0;
+  }
+  100% {
+    background-position: 0 100px;
+  }
+}
+
+/* Intensity variants */
+.crt-scanlines--light {
+  opacity: 0.4;
+}
+
+.crt-scanlines--medium {
+  opacity: 0.6;
+}
+
+.crt-scanlines--heavy {
+  opacity: 0.8;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   VIGNETTE — Edge darkening
+───────────────────────────────────────────────────────────────────────────── */
+.crt-vignette {
+  position: absolute;
+  inset: 0;
+  z-index: 15;
+  pointer-events: none;
+  
+  background: radial-gradient(
+    ellipse 80% 70% at 50% 50%,
+    transparent 0%,
+    transparent 50%,
+    rgba(0, 0, 0, 0.3) 80%,
+    rgba(0, 0, 0, 0.7) 100%
+  );
+}
+
+/* Stronger vignette for more dramatic CRT look */
+.crt-vignette--strong {
+  background: radial-gradient(
+    ellipse 70% 60% at 50% 50%,
+    transparent 0%,
+    transparent 40%,
+    rgba(0, 0, 0, 0.4) 70%,
+    rgba(0, 0, 0, 0.85) 100%
+  );
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   SCREEN GLARE — Diagonal reflection
+───────────────────────────────────────────────────────────────────────────── */
+.crt-glare {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  pointer-events: none;
+  
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.03) 0%,
+    rgba(255, 255, 255, 0.06) 20%,
+    transparent 40%,
+    transparent 100%
+  );
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   NOISE — Static grain (subtle)
+───────────────────────────────────────────────────────────────────────────── */
+.crt-noise {
+  position: absolute;
+  inset: 0;
+  z-index: 8;
+  pointer-events: none;
+  opacity: 0.03;
+  
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  
+  animation: crt-noise-flicker 0.15s steps(3) infinite;
+}
+
+@keyframes crt-noise-flicker {
+  0%, 100% {
+    opacity: 0.03;
+    transform: translate(0, 0);
+  }
+  33% {
+    opacity: 0.04;
+    transform: translate(-1px, 0);
+  }
+  66% {
+    opacity: 0.02;
+    transform: translate(1px, 0);
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   FLICKER — Subtle screen instability
+───────────────────────────────────────────────────────────────────────────── */
+.crt-flicker {
+  animation: crt-screen-flicker 8s ease-in-out infinite;
+}
+
+@keyframes crt-screen-flicker {
+  0%, 100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  2% {
+    opacity: 0.98;
+    transform: translateY(0.3px);
+  }
+  4% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  47% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  48% {
+    opacity: 0.97;
+    transform: translateY(-0.4px);
+  }
+  49% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  50% {
+    opacity: 0.99;
+    transform: translateY(0.2px);
+  }
+  51% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  92% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  93% {
+    opacity: 0.985;
+    transform: translateY(-0.3px);
+  }
+  94% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   POWER ON ANIMATION
+───────────────────────────────────────────────────────────────────────────── */
+.crt-power-on-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 100;
+  pointer-events: none;
+  background: #fff;
+  animation: crt-power-on 800ms ease-out forwards;
+}
+
+@keyframes crt-power-on {
+  0% {
+    opacity: 1;
+    transform: scaleY(1);
+    background: #fff;
+  }
+  15% {
+    opacity: 1;
+    transform: scaleY(1);
+    background: #fff;
+  }
+  30% {
+    opacity: 1;
+    transform: scaleY(0.01);
+    background: #fff;
+  }
+  35% {
+    opacity: 1;
+    transform: scaleY(0.01) scaleX(0.8);
+    background: #00ff41;
+  }
+  50% {
+    opacity: 0.9;
+    transform: scaleY(0.01) scaleX(0.6);
+    background: #00ff41;
+  }
+  60% {
+    opacity: 0.8;
+    transform: scaleY(0.3) scaleX(0.9);
+    background: rgba(0, 255, 65, 0.5);
+  }
+  80% {
+    opacity: 0.3;
+    transform: scaleY(0.8) scaleX(1);
+    background: rgba(0, 255, 65, 0.2);
+  }
+  100% {
+    opacity: 0;
+    transform: scaleY(1) scaleX(1);
+    background: transparent;
+  }
+}
+
+/* Horizontal line that expands */
+.crt-power-on-line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 2px;
+  background: #00ff41;
+  box-shadow: 0 0 20px #00ff41, 0 0 40px #00ff41;
+  transform: translateY(-50%);
+  animation: crt-line-expand 600ms ease-out forwards;
+  animation-delay: 200ms;
+  opacity: 0;
+}
+
+@keyframes crt-line-expand {
+  0% {
+    opacity: 1;
+    transform: translateY(-50%) scaleX(0);
+  }
+  30% {
+    opacity: 1;
+    transform: translateY(-50%) scaleX(1);
+  }
+  60% {
+    opacity: 1;
+    transform: translateY(-50%) scaleX(1) scaleY(100);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-50%) scaleX(1) scaleY(100);
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   REDUCED MOTION
+───────────────────────────────────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .crt-scanlines,
+  .crt-noise,
+  .crt-flicker,
+  .crt-power-on-overlay,
+  .crt-power-on-line {
+    animation: none;
+  }
+  
+  .crt-power-on-overlay {
+    opacity: 0;
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   RESPONSIVE ADJUSTMENTS
+───────────────────────────────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .crt-smiley-layer {
+    padding-left: clamp(16px, 4vw, 40px);
+  }
+  
+  .crt-smiley-image {
+    width: clamp(150px, 50vw, 300px);
+  }
+  
+  /* Reduce scanline density on mobile for performance */
+  .crt-scanlines {
+    background-size: 100% 3px;
+  }
+}

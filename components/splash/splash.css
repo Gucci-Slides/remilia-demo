@@ -1,0 +1,336 @@
+/* ═══════════════════════════════════════════════════════════════════════════════
+   REMILIA SPLASH — CRT Publisher Logo Screen
+   
+   Reference: Captured CRT broadcast, not rendered logo
+   - ULTRA-THIN base glyphs (glow does the work)
+   - Layered glow with color separation (cyan → blue → violet)
+   - Smiley as luminous mark, not graphic
+   - Capture softness throughout
+═══════════════════════════════════════════════════════════════════════════════ */
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   CONTAINER — Fullscreen CRT display
+───────────────────────────────────────────────────────────────────────────── */
+.splash-container {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #000;
+  overflow: hidden;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   SCREEN ATMOSPHERE — Making the black feel like a CRT, not void
+───────────────────────────────────────────────────────────────────────────── */
+
+/* Center bloom - faint luminance in the middle */
+.splash-center-bloom {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background: radial-gradient(
+    ellipse 60% 50% at 50% 50%,
+    rgba(60, 80, 140, 0.06) 0%,
+    rgba(40, 60, 120, 0.03) 30%,
+    transparent 60%
+  );
+}
+
+/* Vignette - heavier edge darkening */
+.splash-vignette {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  background: radial-gradient(
+    ellipse 75% 65% at 50% 50%,
+    transparent 0%,
+    transparent 30%,
+    rgba(0, 0, 0, 0.35) 60%,
+    rgba(0, 0, 0, 0.7) 85%,
+    rgba(0, 0, 0, 0.85) 100%
+  );
+}
+
+/* Diagonal glare band - subtle broadcast artifact */
+.splash-glare {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 2;
+  background: linear-gradient(
+    135deg,
+    transparent 0%,
+    transparent 40%,
+    rgba(100, 120, 180, 0.015) 45%,
+    rgba(120, 140, 200, 0.02) 50%,
+    rgba(100, 120, 180, 0.015) 55%,
+    transparent 60%,
+    transparent 100%
+  );
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   SCANLINES — CRT lines with opacity jitter via animation
+───────────────────────────────────────────────────────────────────────────── */
+.splash-scanlines {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 10;
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent 0px,
+    transparent 2px,
+    rgba(0, 0, 0, 0.08) 2px,
+    rgba(0, 0, 0, 0.08) 4px
+  );
+  animation: scanline-jitter 0.15s steps(2) infinite;
+}
+
+@keyframes scanline-jitter {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.92; }
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   FILM GRAIN — Heavier noise for analog feel
+───────────────────────────────────────────────────────────────────────────── */
+.splash-grain {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 8;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  opacity: 0.12;
+  mix-blend-mode: overlay;
+  animation: grain-shift 0.3s steps(3) infinite;
+}
+
+@keyframes grain-shift {
+  0%, 100% { transform: translate(0, 0); }
+  33% { transform: translate(-1px, 1px); }
+  66% { transform: translate(1px, -1px); }
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   LOCKUP CONTAINER — Centered wordmark + emblem
+───────────────────────────────────────────────────────────────────────────── */
+.splash-lockup {
+  position: relative;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  gap: clamp(20px, 4vw, 48px);
+  
+  /* Capture softness - NOT blur, but soft focus */
+  filter: blur(0.3px);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   WORDMARK — "remilia" ULTRA-THIN with heavy layered glow
+   
+   Critical: The base glyph should feel like it could disappear.
+   The glow creates all the visual weight.
+───────────────────────────────────────────────────────────────────────────── */
+.splash-wordmark-wrap {
+  position: relative;
+}
+
+/* Bloom backdrop - violet outer haze */
+.splash-wordmark-wrap::before {
+  content: '';
+  position: absolute;
+  inset: -100px -140px;
+  background: radial-gradient(
+    ellipse 50% 50% at 50% 50%,
+    rgba(90, 70, 160, 0.12) 0%,
+    rgba(70, 50, 140, 0.06) 40%,
+    transparent 70%
+  );
+  filter: blur(40px);
+  pointer-events: none;
+  z-index: -2;
+}
+
+.splash-wordmark {
+  position: relative;
+  font-family: var(--font-meta), 'Inter', system-ui, -apple-system, sans-serif;
+  font-size: clamp(48px, 11vw, 120px);
+  
+  /* ULTRA-THIN - this is critical */
+  font-weight: 100;
+  font-variation-settings: 'wght' 150;
+  
+  letter-spacing: 0.02em;
+  color: rgba(200, 220, 255, 0.7); /* Faint, fragile core */
+  text-transform: lowercase;
+  line-height: 1;
+  margin: 0;
+  
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  
+  /* ═══ LAYERED GLOW STACK ═══
+     Color separation: cyan → blue → violet
+     If you squint and see one color, it's wrong.
+  */
+  text-shadow:
+    /* Layer 1: Inner glow - cool cyan, hugging the glyph */
+    0 0 1px rgba(180, 220, 255, 0.9),
+    0 0 2px rgba(160, 210, 255, 0.8),
+    0 0 4px rgba(140, 200, 255, 0.7),
+    
+    /* Layer 2: Mid glow - deeper blue spreading */
+    0 0 8px rgba(100, 160, 255, 0.55),
+    0 0 16px rgba(80, 140, 255, 0.4),
+    0 0 24px rgba(60, 120, 255, 0.3),
+    
+    /* Layer 3: Outer bloom - violet haze fading out */
+    0 0 40px rgba(90, 80, 200, 0.25),
+    0 0 60px rgba(80, 60, 180, 0.18),
+    0 0 80px rgba(70, 50, 160, 0.12),
+    
+    /* Layer 4: Far reach - barely visible violet */
+    0 0 100px rgba(60, 40, 140, 0.08),
+    0 0 120px rgba(50, 30, 120, 0.05);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   CHROMATIC ABERRATION — RGB fringing ±1px (subtle misalignment)
+───────────────────────────────────────────────────────────────────────────── */
+.splash-wordmark-chroma {
+  position: relative;
+}
+
+/* Red/warm channel - shifted right */
+.splash-wordmark-chroma::before {
+  content: attr(data-text);
+  position: absolute;
+  top: 0;
+  left: 0;
+  transform: translateX(1px);
+  color: rgba(255, 180, 180, 0.08);
+  font-family: inherit;
+  font-size: inherit;
+  font-weight: inherit;
+  font-variation-settings: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+  pointer-events: none;
+  z-index: -1;
+  filter: blur(0.5px);
+}
+
+/* Blue channel - shifted left */
+.splash-wordmark-chroma::after {
+  content: attr(data-text);
+  position: absolute;
+  top: 0;
+  left: 0;
+  transform: translateX(-1px);
+  color: rgba(150, 180, 255, 0.08);
+  font-family: inherit;
+  font-size: inherit;
+  font-weight: inherit;
+  font-variation-settings: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+  pointer-events: none;
+  z-index: -1;
+  filter: blur(0.5px);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   SMILEY EMBLEM — Blue spectral family, luminous mark
+   
+   Critical: This must glow like it's made of light, not ink.
+   Same phosphor logic as the text.
+───────────────────────────────────────────────────────────────────────────── */
+.splash-emblem {
+  position: relative;
+  width: clamp(56px, 12vw, 130px);
+  height: clamp(56px, 12vw, 130px);
+  flex-shrink: 0;
+  /* Float up slightly like Rockstar stars */
+  margin-top: clamp(-16px, -3vw, -32px);
+}
+
+.splash-emblem-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  
+  /* Convert yellow smiley to blue spectral family */
+  filter: 
+    grayscale(1)
+    brightness(1.6)
+    contrast(0.9)
+    sepia(0.3)
+    hue-rotate(180deg)
+    saturate(1.4);
+  
+  opacity: 0.85;
+}
+
+/* Emblem inner glow - cyan, matching text inner glow */
+.splash-emblem::before {
+  content: '';
+  position: absolute;
+  inset: -10px;
+  background: radial-gradient(
+    circle at 50% 50%,
+    rgba(140, 200, 255, 0.35) 0%,
+    rgba(100, 160, 255, 0.2) 40%,
+    transparent 70%
+  );
+  filter: blur(12px);
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* Emblem outer glow - violet, matching text outer glow */
+.splash-emblem::after {
+  content: '';
+  position: absolute;
+  inset: -30px;
+  background: radial-gradient(
+    circle at 50% 50%,
+    rgba(80, 60, 180, 0.15) 0%,
+    rgba(60, 40, 140, 0.08) 50%,
+    transparent 70%
+  );
+  filter: blur(25px);
+  pointer-events: none;
+  z-index: -2;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   IDLE ANIMATION — Subtle glow breathing (optional)
+───────────────────────────────────────────────────────────────────────────── */
+.splash-wordmark {
+  animation: glow-breathe 4s ease-in-out infinite;
+}
+
+@keyframes glow-breathe {
+  0%, 100% {
+    filter: brightness(1);
+  }
+  50% {
+    filter: brightness(1.08);
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   REDUCED MOTION
+───────────────────────────────────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .splash-grain,
+  .splash-scanlines,
+  .splash-wordmark {
+    animation: none;
+  }
+}

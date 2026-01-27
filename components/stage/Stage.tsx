@@ -16,9 +16,9 @@ import { Globe } from '@/components/ui/globe';
 //
 // EXACT SCROLL TIMELINE:
 // ──────────────────────
-// 0.00 - 0.18: Act 0/I visible, globe rotating
-// 0.18 - 0.70: MORPH PHASE (morphProgress 0 → 1)
-// 0.25:        Globe rotation locks
+// 0.00 - 0.14: Act 0 — Typography-only title page (no globe, no imagery)
+// 0.14 - 0.22: Act I text fades in, globe still hidden
+// 0.22 - 0.45: Globe fades in, then morphs to face
 // 0.32 - 0.55: Face emerges (faceOpacity 0 → 1)
 // 0.34 - 0.42: Transition sentence appears
 // 0.45:        Globe fully faded
@@ -30,8 +30,10 @@ import { Globe } from '@/components/ui/globe';
 // ✗ NO conditional rendering that creates new instances
 // ✗ NO duplicated DOM nodes
 // ✗ NO re-mounting on scroll
+// ✗ NO imagery on title page (Act 0)
 // ✓ Single MorphObject instance
 // ✓ State changes via transforms only
+// ✓ Typography carries visual weight on title page
 // ═══════════════════════════════════════════════════════════════════════════
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -40,10 +42,7 @@ import { Globe } from '@/components/ui/globe';
 
 const CONTENT = {
   act0: {
-    kicker: 'REMILIA',
-    witnessLine: 'WITNESS MARK · RML-01',
     title: 'Remilia',
-    subtitle: 'A network state in formation.',
   },
   act1: {
     headline: 'Remilia is a Network State.',
@@ -110,11 +109,11 @@ export function Stage() {
   );
 
   // C. GLOBE OPACITY → IDENTITY PRESENCE
-  // Globe never coexists with final face
+  // Globe hidden on title page, fades in during morph, never coexists with final face
   const globeOpacity = useTransform(
     scrollYProgress,
-    [0.0, 0.45],
-    [1, 0],
+    [0.0, 0.14, 0.22, 0.45],
+    [0, 0, 1, 0],
     { clamp: true }
   );
 
@@ -213,6 +212,7 @@ export function Stage() {
     [0.10, 0.16],
     [0, -16]
   );
+
   
   // Act I text: fades in after Act 0, visible until morph midpoint
   const act1Opacity = useTransform(
@@ -248,6 +248,7 @@ export function Stage() {
     { clamp: true }
   );
 
+
   // ─────────────────────────────────────────────────────────────────────────
   // REDUCED MOTION FALLBACK
   // ─────────────────────────────────────────────────────────────────────────
@@ -256,8 +257,7 @@ export function Stage() {
       <section className="min-h-screen bg-white py-24">
         <div className="max-w-[1200px] mx-auto px-12">
           <div className="max-w-[600px]">
-            <h1 className="font-serif text-5xl mb-4">{CONTENT.act0.title}</h1>
-            <p className="font-serif text-lg mb-8">{CONTENT.act0.subtitle}</p>
+            <h1 className="font-serif text-5xl mb-8">{CONTENT.act0.title}</h1>
             <p className="font-serif text-2xl mb-4">{CONTENT.act1.headline}</p>
             {CONTENT.act1.lines.map((line, i) => (
               <p key={i} className="font-serif text-lg">{line}</p>
@@ -418,52 +418,7 @@ export function Stage() {
         >
           <div className="relative h-full" style={{ maxWidth: '600px' }}>
             
-            {/* ═══════════════════════════════════════════════════════════
-                ACT 0 TEXT — Title page (always in DOM, opacity controlled)
-                ═══════════════════════════════════════════════════════════ */}
-            <motion.div
-              className="absolute"
-              style={{
-                top: '40vh',
-                left: 0,
-                right: 0,
-                opacity: act0Opacity,
-                y: act0Y,
-              }}
-            >
-              <p className="text-[10px] font-medium tracking-[0.22em] uppercase text-black/50 mb-1">
-                {CONTENT.act0.kicker}
-              </p>
-              <p className="text-[9px] tracking-[0.18em] uppercase text-black/35 mb-6">
-                {CONTENT.act0.witnessLine}
-              </p>
-              <h1
-                className="font-serif"
-                style={{
-                  fontSize: 'clamp(3.5rem, 9vw, 6rem)',
-                  fontWeight: 400,
-                  lineHeight: 0.92,
-                  color: '#0a0a0a',
-                  letterSpacing: '-0.025em',
-                  marginBottom: '1.25rem',
-                }}
-              >
-                {CONTENT.act0.title}
-              </h1>
-              <p
-                className="font-serif"
-                style={{
-                  fontSize: 'clamp(1rem, 2vw, 1.35rem)',
-                  color: 'rgba(0,0,0,0.55)',
-                  lineHeight: 1.35,
-                }}
-              >
-                {CONTENT.act0.subtitle}
-              </p>
-              <p className="absolute bottom-[-28vh] left-0 text-[8px] tracking-[0.3em] uppercase text-black/25">
-                SCROLL
-              </p>
-            </motion.div>
+            {/* Monument moved to TitleStage — Act 0 now separate */}
 
             {/* ═══════════════════════════════════════════════════════════
                 ACT I TEXT — Network State (always in DOM, opacity controlled)
@@ -565,6 +520,9 @@ export function Stage() {
           </div>
         </div>
 
+        {/* Witness line moved to TitleStage */}
+
+
         {/* ─────────────────────────────────────────────────────────────────
             METADATA LABELS — Top right, appears during Act II
             ───────────────────────────────────────────────────────────────── */}
@@ -595,11 +553,12 @@ export function Stage() {
 // 
 // Progress | Phase                | Globe    | Face     | Text              | Notes
 // ─────────|──────────────────────|──────────|──────────|───────────────────|──────────────
-// 0.00     | Act 0 Start          | 100%     | 0%       | Act 0             | Globe rotating
-// 0.10     | Act 0 Fade           | 100%     | 0%       | Act 0 fading      |
-// 0.14     | Act I Emerge         | 100%     | 0%       | Act I fading in   |
-// 0.18     | Morph Start          | 100%     | 0%       | Act I             | morphProgress starts
-// 0.25     | Rotation Lock        | ~90%     | 0%       | Act I             | Globe stops rotating
+// 0.00     | Act 0 Start          | 0%       | 0%       | Act 0             | Typography-only title
+// 0.10     | Act 0 Fade           | 0%       | 0%       | Act 0 fading      | No illustration
+// 0.14     | Act I Emerge         | 0%       | 0%       | Act I fading in   |
+// 0.18     | Morph Start          | 0%       | 0%       | Act I             | morphProgress starts
+// 0.22     | Globe Emerge         | →100%    | 0%       | Act I             | Globe fades in
+// 0.25     | Rotation Lock        | 100%     | 0%       | Act I             | Globe stops rotating
 // 0.32     | Face Emerge          | ~70%     | 0%→      | Act I fading      | Face starts appearing
 // 0.34     | Sentence             | ~60%     | ~10%     | Transition        | "Identity becomes medium"
 // 0.42     | Sentence Full        | ~40%     | ~40%     | Transition        | Sentence at full opacity
@@ -614,4 +573,5 @@ export function Stage() {
 // 
 // DOM: ONE globe, ONE face, FOUR text blocks (all mounted, visibility via opacity)
 // GUARANTEE: Fast scroll still shows one morph, one face, no duplicates
+// TITLE PAGE: Globe-less, typography-first. Absence of imagery is intentional.
 // ═══════════════════════════════════════════════════════════════════════════

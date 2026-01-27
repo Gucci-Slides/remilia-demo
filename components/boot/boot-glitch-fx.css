@@ -1,0 +1,398 @@
+/* ═══════════════════════════════════════════════════════════════════════════════
+   BOOT GLITCH FX — Phase-based CRT transition effects
+   
+   Phase 1 (0-350ms): Yellow destabilize - warm spectrum, CRT noise
+   Phase 2 (350-520ms): Color collapse - flash, desaturate, blue linger
+   Phase 3 (520-900ms): Blue asserts - ghost → title
+═══════════════════════════════════════════════════════════════════════════════ */
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   BASE OVERLAY CONTAINER
+───────────────────────────────────────────────────────────────────────────── */
+.boot-glitch-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  pointer-events: none;
+  background: transparent;
+}
+
+.boot-glitch-overlay--blocking {
+  pointer-events: all;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   SCANLINES — CRT horizontal lines
+───────────────────────────────────────────────────────────────────────────── */
+.glitch-scanlines {
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent 0px,
+    transparent 2px,
+    rgba(0, 0, 0, 0.25) 2px,
+    rgba(0, 0, 0, 0.25) 4px
+  );
+  opacity: 0;
+  transition: opacity 0.05s ease;
+}
+
+.glitch-scanlines--p1 {
+  opacity: 0.7;
+  animation: scanline-flicker 0.08s steps(2) infinite;
+}
+
+.glitch-scanlines--p2 {
+  opacity: 0.9;
+}
+
+.glitch-scanlines--p3 {
+  opacity: 0.3;
+  animation: none;
+}
+
+@keyframes scanline-flicker {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 0.8; }
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   NOISE LAYER — Static grain
+───────────────────────────────────────────────────────────────────────────── */
+.glitch-noise {
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  opacity: 0;
+  mix-blend-mode: overlay;
+}
+
+.glitch-noise--p1 {
+  opacity: 0.15;
+  animation: noise-jitter 0.05s steps(3) infinite;
+}
+
+.glitch-noise--p2 {
+  opacity: 0.25;
+}
+
+.glitch-noise--p3 {
+  opacity: 0.05;
+}
+
+@keyframes noise-jitter {
+  0% { transform: translate(0, 0); }
+  33% { transform: translate(-2px, 1px); }
+  66% { transform: translate(1px, -1px); }
+  100% { transform: translate(0, 0); }
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   GLITCH SLICES — Horizontal bands shifting X
+───────────────────────────────────────────────────────────────────────────── */
+.glitch-slice {
+  position: absolute;
+  left: -5%;
+  width: 110%;
+  background: rgba(255, 244, 192, 0.08);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.glitch-slice--p1 {
+  opacity: 1;
+}
+
+.glitch-slice-1 {
+  top: 12%;
+  height: 14px;
+  animation: slice-shift-1 0.12s steps(4) infinite;
+}
+
+.glitch-slice-2 {
+  top: 28%;
+  height: 22px;
+  animation: slice-shift-2 0.15s steps(5) infinite;
+}
+
+.glitch-slice-3 {
+  top: 45%;
+  height: 18px;
+  animation: slice-shift-3 0.1s steps(3) infinite;
+}
+
+.glitch-slice-4 {
+  top: 62%;
+  height: 26px;
+  animation: slice-shift-4 0.13s steps(4) infinite;
+}
+
+.glitch-slice-5 {
+  top: 78%;
+  height: 16px;
+  animation: slice-shift-5 0.11s steps(3) infinite;
+}
+
+@keyframes slice-shift-1 {
+  0% { transform: translateX(0); }
+  25% { transform: translateX(25px); }
+  50% { transform: translateX(-15px); }
+  75% { transform: translateX(10px); }
+  100% { transform: translateX(0); }
+}
+
+@keyframes slice-shift-2 {
+  0% { transform: translateX(0); }
+  20% { transform: translateX(-30px); }
+  40% { transform: translateX(20px); }
+  60% { transform: translateX(-10px); }
+  80% { transform: translateX(5px); }
+  100% { transform: translateX(0); }
+}
+
+@keyframes slice-shift-3 {
+  0% { transform: translateX(0); }
+  33% { transform: translateX(40px); }
+  66% { transform: translateX(-25px); }
+  100% { transform: translateX(0); }
+}
+
+@keyframes slice-shift-4 {
+  0% { transform: translateX(0); }
+  25% { transform: translateX(-20px); }
+  50% { transform: translateX(35px); }
+  75% { transform: translateX(-15px); }
+  100% { transform: translateX(0); }
+}
+
+@keyframes slice-shift-5 {
+  0% { transform: translateX(0); }
+  33% { transform: translateX(15px); }
+  66% { transform: translateX(-30px); }
+  100% { transform: translateX(0); }
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   CHROMATIC ABERRATION — RGB channel separation (warm spectrum for P1)
+───────────────────────────────────────────────────────────────────────────── */
+.glitch-chroma {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Phase 1: Warm spectrum (yellow/green/white) - NO BLUE */
+.glitch-chroma--p1 {
+  opacity: 1;
+  box-shadow:
+    inset -4px 0 0 rgba(255, 212, 0, 0.3),
+    inset 4px 0 0 rgba(154, 255, 106, 0.15);
+  animation: chroma-warm 0.1s steps(3) infinite;
+}
+
+@keyframes chroma-warm {
+  0% {
+    box-shadow:
+      inset -4px 0 0 rgba(255, 212, 0, 0.3),
+      inset 4px 0 0 rgba(154, 255, 106, 0.15);
+  }
+  33% {
+    box-shadow:
+      inset -6px 0 0 rgba(255, 246, 192, 0.4),
+      inset 5px 0 0 rgba(154, 255, 106, 0.2);
+  }
+  66% {
+    box-shadow:
+      inset -3px 0 0 rgba(255, 212, 0, 0.35),
+      inset 3px 0 0 rgba(200, 255, 150, 0.15);
+  }
+  100% {
+    box-shadow:
+      inset -5px 0 0 rgba(255, 246, 192, 0.35),
+      inset 4px 0 0 rgba(154, 255, 106, 0.18);
+  }
+}
+
+/* Phase 2: RGB split with blue linger */
+.glitch-chroma--p2 {
+  opacity: 1;
+  animation: chroma-collapse 0.17s ease-out forwards;
+}
+
+@keyframes chroma-collapse {
+  0% {
+    box-shadow:
+      inset -8px 0 0 rgba(255, 100, 100, 0.5),
+      inset 8px 0 0 rgba(100, 200, 255, 0.5);
+  }
+  40% {
+    box-shadow:
+      inset -2px 0 0 rgba(255, 100, 100, 0.2),
+      inset 6px 0 0 rgba(58, 92, 255, 0.6);
+  }
+  70% {
+    box-shadow:
+      inset 0 0 0 rgba(255, 100, 100, 0),
+      inset 4px 0 0 rgba(58, 92, 255, 0.5);
+  }
+  100% {
+    box-shadow:
+      inset 0 0 0 rgba(255, 100, 100, 0),
+      inset 2px 0 0 rgba(58, 92, 255, 0.3);
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   LUMINANCE OVERDRIVE — Yellow blow-out toward near-white
+───────────────────────────────────────────────────────────────────────────── */
+.glitch-overdrive {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    ellipse 60% 50% at 30% 40%,
+    rgba(255, 246, 192, 0.4) 0%,
+    transparent 70%
+  );
+  opacity: 0;
+  mix-blend-mode: screen;
+  pointer-events: none;
+}
+
+.glitch-overdrive--p1 {
+  opacity: 1;
+  animation: overdrive-pulse 0.15s ease-in-out infinite;
+}
+
+@keyframes overdrive-pulse {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 0.6; }
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   FLASH OVERLAY — Phase 2 clipped near-white flash
+───────────────────────────────────────────────────────────────────────────── */
+.glitch-flash {
+  position: absolute;
+  inset: 0;
+  background: #F5F7FF;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.glitch-flash--p2 {
+  animation: flash-collapse 0.17s ease-out forwards;
+}
+
+@keyframes flash-collapse {
+  0% {
+    opacity: 1;
+  }
+  30% {
+    opacity: 0.9;
+  }
+  60% {
+    opacity: 0.4;
+    filter: saturate(0.3);
+  }
+  100% {
+    opacity: 0;
+    filter: saturate(0);
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   BLUE GHOST — Lingers after collapse (Phase 2 end / Phase 3 start)
+───────────────────────────────────────────────────────────────────────────── */
+.glitch-blue-ghost {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.glitch-blue-ghost-shape {
+  width: clamp(200px, 40vw, 400px);
+  height: clamp(100px, 15vh, 150px);
+  background: radial-gradient(
+    ellipse 100% 80% at 50% 50%,
+    rgba(58, 92, 255, 0.4) 0%,
+    rgba(43, 76, 255, 0.2) 40%,
+    transparent 70%
+  );
+  filter: blur(30px);
+}
+
+.glitch-blue-ghost--p2-end {
+  opacity: 1;
+  animation: blue-ghost-appear 0.08s ease-out forwards;
+}
+
+.glitch-blue-ghost--p3 {
+  opacity: 1;
+  animation: blue-ghost-fade 0.38s ease-out forwards;
+}
+
+@keyframes blue-ghost-appear {
+  0% { opacity: 0; }
+  100% { opacity: 0.8; }
+}
+
+@keyframes blue-ghost-fade {
+  0% { opacity: 0.8; }
+  30% { opacity: 0.6; }
+  100% { opacity: 0; }
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   BACKGROUND SNAP — Near-black background for Phase 3
+───────────────────────────────────────────────────────────────────────────── */
+.glitch-bg-black {
+  position: absolute;
+  inset: 0;
+  background: #05060A;
+  opacity: 0;
+  pointer-events: none;
+  z-index: -1;
+}
+
+.glitch-bg-black--p3 {
+  opacity: 1;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   SCREEN JITTER — Global shake during glitch
+───────────────────────────────────────────────────────────────────────────── */
+.glitch-jitter--p1 {
+  animation: screen-jitter 0.06s steps(3) infinite;
+}
+
+@keyframes screen-jitter {
+  0% { transform: translate(0, 0); }
+  25% { transform: translate(-2px, 1px); }
+  50% { transform: translate(1px, -1px); }
+  75% { transform: translate(-1px, 0); }
+  100% { transform: translate(0, 0); }
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   REDUCED MOTION
+───────────────────────────────────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .glitch-scanlines--p1,
+  .glitch-noise--p1,
+  .glitch-slice--p1,
+  .glitch-chroma--p1,
+  .glitch-chroma--p2,
+  .glitch-overdrive--p1,
+  .glitch-flash--p2,
+  .glitch-blue-ghost--p2-end,
+  .glitch-blue-ghost--p3,
+  .glitch-jitter--p1 {
+    animation: none;
+  }
+}

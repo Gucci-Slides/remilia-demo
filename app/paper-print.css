@@ -1,0 +1,728 @@
+/* ═══════════════════════════════════════════════════════════════════════════════
+   PAPER-PRINT SYSTEM — Physical Document Rendering
+   
+   Treats the browser viewport as a physical sheet of paper with programmable
+   print/ink rules. The page reads like a document that could be printed and
+   archived, enhanced with subtle "print physics."
+   
+   TUNABLE VARIABLES:
+   --paper-base:     Base paper color (warm off-white)
+   --paper-warmth:   Yellow/cream tint intensity
+   --grain-a:        Primary grain layer opacity
+   --grain-b:        Secondary grain layer opacity
+   
+   PER-TIER INK SYSTEM (print-condition variance):
+   --ink-04:         MONUMENT — highest density
+   --ink-03:         STATE — normal, crisp
+   --ink-02:         ARCHIVE — lighter
+   --ink-01:         LABEL — lighter still
+   --ink-00:         MICRO — lightest, under-inked
+   
+   --track-04:       MONUMENT tracking
+   --track-03:       STATE tracking  
+   --track-02:       ARCHIVE tracking (tighter)
+   --track-01:       LABEL tracking (wider)
+   --track-00:       MICRO tracking
+   
+   --ghost-opacity:  Registration ghost opacity (MONUMENT only)
+═══════════════════════════════════════════════════════════════════════════════ */
+
+/* ─────────────────────────────────────────────────────────────────────────────────
+   ROOT TOKENS — Paper & Ink System
+───────────────────────────────────────────────────────────────────────────────── */
+
+:root {
+  /* Paper tones */
+  --paper-base: #f5f2eb;
+  --paper-warmth: #faf8f3;
+  --paper-shadow: rgba(45, 40, 35, 0.04);
+  
+  /* ═══════════════════════════════════════════════════════════════════════════
+     PER-TIER INK DENSITY — Print-condition variance
+     
+     Adjusts opacity to simulate different ink saturation per tier.
+     Changes should be "felt" not "seen."
+  ═══════════════════════════════════════════════════════════════════════════ */
+  
+  /* TIER 04: MONUMENT — Highest ink density */
+  --ink-04: rgba(18, 16, 14, 0.96);
+  --track-04: 0.16em;
+  --ghost-opacity: 0.04;
+  --ghost-offset-x: 1px;
+  --ghost-offset-y: 0.5px;
+  
+  /* TIER 03: STATE — Normal, crisp */
+  --ink-03: rgba(18, 16, 14, 0.88);
+  --track-03: 0.05em;
+  
+  /* TIER 02: ARCHIVE — Slightly lighter, tighter tracking */
+  --ink-02: rgba(18, 16, 14, 0.68);
+  --track-02: -0.005em;
+  
+  /* TIER 01: LABEL — Lighter ink, wider tracking */
+  --ink-01: rgba(18, 16, 14, 0.52);
+  --track-01: 0.10em;
+  
+  /* TIER 00: MICRO — Lightest, borderline under-inked */
+  --ink-00: rgba(18, 16, 14, 0.36);
+  --track-00: 0.06em;
+  
+  /* Legacy ink model (for metadata, marginalia) */
+  --ink: rgba(18, 16, 14, 0.94);
+  --ink-soft: rgba(18, 16, 14, 0.88);
+  --ink-mid: rgba(18, 16, 14, 0.72);
+  --ink-light: rgba(18, 16, 14, 0.56);
+  --ink-faint: rgba(18, 16, 14, 0.38);
+  --ink-ghost: rgba(18, 16, 14, 0.04);
+  
+  /* Document identifier ink (65-75% of header ink) */
+  --ink-identifier: rgba(18, 16, 14, 0.42);
+  
+  /* Print rules */
+  --rule: rgba(18, 16, 14, 0.09);
+  --rule-faint: rgba(18, 16, 14, 0.05);
+  
+  /* Annotation field guide */
+  --annotation-guide: rgba(18, 16, 14, 0.04);
+  
+  /* Grain layers */
+  --grain-a: 0.018;
+  --grain-b: 0.012;
+  
+  /* Baseline rhythm */
+  --baseline-unit: 8px;
+  --line-height-base: calc(var(--baseline-unit) * 3);
+  
+  /* Page margins — Left-weighted for annotation field */
+  --page-pad-x: clamp(48px, 8vw, 96px);
+  --page-pad-y: clamp(48px, 8vh, 80px);
+  --page-pad-right: clamp(120px, 18vw, 200px); /* Wider right margin */
+  
+  /* Crop mark offset */
+  --crop-offset: clamp(20px, 3vw, 32px);
+  --crop-length: 14px;
+  --crop-weight: 1px;
+  --crop-color: rgba(18, 16, 14, 0.12);
+  
+  /* Registration tick */
+  --tick-color: rgba(18, 16, 14, 0.03);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────────
+   PAPER SURFACE — Base Layer
+   
+   Warm off-white with subtle tonal variation via layered gradients.
+───────────────────────────────────────────────────────────────────────────────── */
+
+.paper-surface {
+  position: relative;
+  min-height: 100vh;
+  min-height: 100dvh;
+  background: var(--paper-base);
+  
+  /* Force light mode regardless of OS preference */
+  color-scheme: light only;
+  
+  /* Subtle paper warmth variation */
+  background-image: 
+    /* Warmth gradient — center slightly warmer */
+    radial-gradient(
+      ellipse 80% 60% at 50% 45%,
+      var(--paper-warmth) 0%,
+      transparent 70%
+    ),
+    /* Edge cooling — very subtle */
+    linear-gradient(
+      180deg,
+      transparent 0%,
+      rgba(200, 195, 185, 0.02) 100%
+    );
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────────
+   PAPER GRAIN — CSS-only texture
+   
+   Layered repeating gradients creating paper fiber illusion.
+   No images, pure CSS.
+───────────────────────────────────────────────────────────────────────────────── */
+
+.paper-grain {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  mix-blend-mode: multiply;
+  
+  /* Multi-layer grain pattern */
+  background-image:
+    /* Layer 1: Fine horizontal fibers */
+    repeating-linear-gradient(
+      0deg,
+      transparent 0px,
+      transparent 2px,
+      rgba(120, 110, 100, var(--grain-a)) 2px,
+      transparent 3px
+    ),
+    /* Layer 2: Vertical micro-fibers */
+    repeating-linear-gradient(
+      90deg,
+      transparent 0px,
+      transparent 3px,
+      rgba(100, 95, 85, var(--grain-b)) 3px,
+      transparent 4px
+    ),
+    /* Layer 3: Diagonal texture */
+    repeating-linear-gradient(
+      45deg,
+      transparent 0px,
+      transparent 4px,
+      rgba(110, 105, 95, 0.008) 4px,
+      transparent 5px
+    ),
+    /* Layer 4: Counter-diagonal */
+    repeating-linear-gradient(
+      -45deg,
+      transparent 0px,
+      transparent 6px,
+      rgba(105, 100, 90, 0.006) 6px,
+      transparent 7px
+    ),
+    /* Layer 5: Random-ish dots (pseudo-noise) */
+    radial-gradient(circle at 20% 30%, rgba(90, 85, 75, 0.012) 0.5px, transparent 0.5px),
+    radial-gradient(circle at 80% 70%, rgba(100, 95, 85, 0.010) 0.5px, transparent 0.5px),
+    radial-gradient(circle at 45% 85%, rgba(95, 90, 80, 0.008) 0.5px, transparent 0.5px),
+    radial-gradient(circle at 65% 15%, rgba(85, 80, 70, 0.011) 0.5px, transparent 0.5px);
+    
+  background-size:
+    100% 100%,
+    100% 100%,
+    100% 100%,
+    100% 100%,
+    200px 200px,
+    180px 180px,
+    220px 220px,
+    190px 190px;
+}
+
+/* Optional: barely perceptible grain breathing (1-2% opacity shift) */
+@keyframes grain-breathe {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.98; }
+}
+
+.paper-grain--breathe {
+  animation: grain-breathe 8s ease-in-out infinite;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────────
+   PAPER VIGNETTE — Scanner/ambient light edge falloff
+   
+   Very subtle edge darkening, like paper under soft directional light.
+───────────────────────────────────────────────────────────────────────────────── */
+
+.paper-vignette {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 2;
+  
+  background: radial-gradient(
+    ellipse 85% 80% at 50% 48%,
+    transparent 0%,
+    transparent 55%,
+    rgba(35, 30, 25, 0.025) 75%,
+    rgba(30, 25, 20, 0.045) 90%,
+    rgba(25, 20, 15, 0.06) 100%
+  );
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────────
+   PAPER EDGE — Deckle/print edge illusion (shadow only, no border)
+───────────────────────────────────────────────────────────────────────────────── */
+
+.paper-edge {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 3;
+  
+  /* Soft inner shadow simulating paper edge under glass */
+  box-shadow: 
+    inset 0 0 60px rgba(40, 35, 30, 0.02),
+    inset 0 0 120px rgba(35, 30, 25, 0.015);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────────
+   ANNOTATION FIELD GUIDE — Very faint vertical rule marking reserved space
+   
+   Strengthens the "reserved field" feeling without reading as UI.
+───────────────────────────────────────────────────────────────────────────────── */
+
+.annotation-field-guide {
+  position: fixed;
+  top: var(--page-pad-y);
+  bottom: var(--page-pad-y);
+  right: calc(var(--page-pad-right) - 24px);
+  width: 1px;
+  pointer-events: none;
+  z-index: 4;
+  
+  /* Very faint vertical rule */
+  background: var(--annotation-guide);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────────
+   DOCUMENT AREA — Content safe zone with margins (left-weighted)
+───────────────────────────────────────────────────────────────────────────────── */
+
+.document-area {
+  position: relative;
+  z-index: 10;
+  
+  /* Page margins */
+  padding: var(--page-pad-y) var(--page-pad-x);
+  
+  /* Minimum height fills viewport */
+  min-height: 100vh;
+  min-height: 100dvh;
+  
+  /* Flexbox for vertical distribution */
+  display: flex;
+  flex-direction: column;
+}
+
+/* Left-weighted layout for annotation field */
+.document-area--left-weighted {
+  padding-left: calc(var(--page-pad-x) * 1.1);
+  padding-right: var(--page-pad-right);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────────
+   DOCUMENT IDENTIFIER — Formal archival identifier block
+   
+   Reads as: DOCUMENT 0 / TYPOGRAPHIC CONSTITUTION / REV 1
+   Same family as header metadata but slightly lower contrast.
+───────────────────────────────────────────────────────────────────────────────── */
+
+.document-identifier {
+  font-family: var(--font-label);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-identifier);
+  line-height: calc(var(--baseline-unit) * 2);
+  margin-bottom: calc(var(--baseline-unit) * 3);
+  
+  /* Light ink spread */
+  text-shadow: 0 0 0.25px rgba(18, 16, 14, 0.05);
+}
+
+.document-identifier-line {
+  display: block;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────────
+   HEADER METADATA — Technical specifications
+───────────────────────────────────────────────────────────────────────────────── */
+
+.document-meta {
+  font-family: var(--font-label);
+  font-size: 10px;
+  font-weight: 400;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-light);
+  line-height: calc(var(--baseline-unit) * 2);
+  
+  /* Light ink spread */
+  text-shadow: 0 0 0.3px rgba(18, 16, 14, 0.06);
+}
+
+.document-meta-line {
+  display: block;
+}
+
+/* Footer alignment */
+.document-footer {
+  margin-top: auto;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────────
+   BASELINE RULES — Faint printer guide lines
+───────────────────────────────────────────────────────────────────────────────── */
+
+.baseline-rule {
+  position: relative;
+}
+
+.baseline-rule::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 1px;
+  
+  /* Dotted baseline using gradient */
+  background: repeating-linear-gradient(
+    90deg,
+    var(--rule-faint) 0px,
+    var(--rule-faint) 2px,
+    transparent 2px,
+    transparent 6px
+  );
+}
+
+/* Row-level baseline (for scale rows) */
+.scale-row-baseline {
+  position: relative;
+  padding-bottom: calc(var(--baseline-unit) * 2);
+}
+
+.scale-row-baseline::after {
+  content: '';
+  position: absolute;
+  left: 72px; /* Align with content start */
+  right: 96px; /* Stop well before marginalia */
+  bottom: calc(var(--baseline-unit) * 0.5);
+  height: 1px;
+  
+  /* Imperfect dotted rule */
+  background: repeating-linear-gradient(
+    90deg,
+    var(--rule) 0px,
+    var(--rule) 1px,
+    transparent 1px,
+    transparent 4px,
+    var(--rule-faint) 4px,
+    var(--rule-faint) 5px,
+    transparent 5px,
+    transparent 8px
+  );
+  opacity: 0.7;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────────
+   CROP MARKS — Print registration marks
+───────────────────────────────────────────────────────────────────────────────── */
+
+.crop-marks {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 5;
+}
+
+.crop-mark-print {
+  position: absolute;
+  pointer-events: none;
+}
+
+/* Horizontal stroke */
+.crop-mark-print::before {
+  content: '';
+  position: absolute;
+  width: var(--crop-length);
+  height: var(--crop-weight);
+  background: var(--crop-color);
+}
+
+/* Vertical stroke */
+.crop-mark-print::after {
+  content: '';
+  position: absolute;
+  width: var(--crop-weight);
+  height: var(--crop-length);
+  background: var(--crop-color);
+}
+
+/* Corner positions */
+.crop-mark-print--tl {
+  top: var(--crop-offset);
+  left: var(--crop-offset);
+}
+.crop-mark-print--tl::before { top: 0; left: 0; }
+.crop-mark-print--tl::after { top: 0; left: 0; }
+
+.crop-mark-print--tr {
+  top: var(--crop-offset);
+  right: var(--crop-offset);
+}
+.crop-mark-print--tr::before { top: 0; right: 0; }
+.crop-mark-print--tr::after { top: 0; right: 0; }
+
+.crop-mark-print--br {
+  bottom: var(--crop-offset);
+  right: var(--crop-offset);
+}
+.crop-mark-print--br::before { bottom: 0; right: 0; }
+.crop-mark-print--br::after { bottom: 0; right: 0; }
+
+.crop-mark-print--bl {
+  bottom: var(--crop-offset);
+  left: var(--crop-offset);
+}
+.crop-mark-print--bl::before { bottom: 0; left: 0; }
+.crop-mark-print--bl::after { bottom: 0; left: 0; }
+
+/* Registration ticks (optional, very faint) */
+.registration-tick {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--tick-color);
+}
+
+.registration-tick--tl { top: calc(var(--crop-offset) + 20px); left: calc(var(--crop-offset) + 20px); }
+.registration-tick--tr { top: calc(var(--crop-offset) + 20px); right: calc(var(--crop-offset) + 20px); }
+.registration-tick--br { bottom: calc(var(--crop-offset) + 20px); right: calc(var(--crop-offset) + 20px); }
+.registration-tick--bl { bottom: calc(var(--crop-offset) + 20px); left: calc(var(--crop-offset) + 20px); }
+
+/* ─────────────────────────────────────────────────────────────────────────────────
+   SCALE LADDER — Vertical typographic specimen layout
+───────────────────────────────────────────────────────────────────────────────── */
+
+.scale-ladder {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0;
+  padding: calc(var(--baseline-unit) * 8) 0;
+}
+
+.scale-row-print {
+  position: relative;
+  display: grid;
+  grid-template-columns: 64px 1fr 88px;
+  align-items: baseline;
+  gap: calc(var(--baseline-unit) * 3);
+  padding: calc(var(--baseline-unit) * 2.5) 0;
+}
+
+/* Scale index (left spine) — Per-tier ink variance */
+.scale-index-print {
+  font-family: var(--font-label);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  text-align: right;
+  padding-right: calc(var(--baseline-unit) * 2);
+  text-shadow: 0 0 0.3px rgba(18, 16, 14, 0.08);
+}
+
+/* Per-tier scale index ink */
+.scale-index-print--monument { color: var(--ink-04); }
+.scale-index-print--state { color: var(--ink-03); }
+.scale-index-print--archive { color: var(--ink-02); }
+.scale-index-print--label { color: var(--ink-01); }
+.scale-index-print--micro { color: var(--ink-00); }
+
+/* ─────────────────────────────────────────────────────────────────────────────────
+   MARGINALIA — Right-side tier labels (deep in annotation field)
+   
+   Sits further right, does not visually pull toward center.
+───────────────────────────────────────────────────────────────────────────────── */
+
+.marginalia {
+  font-family: var(--font-label);
+  font-size: 9px;
+  font-weight: 400;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  text-align: right;
+  padding-left: calc(var(--baseline-unit) * 2);
+  
+  /* Subtle ink behavior */
+  text-shadow: 0 0 0.3px rgba(18, 16, 14, 0.06);
+}
+
+/* Per-tier marginalia ink (matches specimen density) */
+.marginalia--monument { color: var(--ink-01); }
+.marginalia--state { color: var(--ink-01); }
+.marginalia--archive { color: var(--ink-01); }
+.marginalia--label { color: var(--ink-00); }
+.marginalia--micro { color: var(--ink-00); opacity: 0.85; }
+
+/* ─────────────────────────────────────────────────────────────────────────────────
+   SPECIMEN TYPOGRAPHY — Per-tier print-condition variance
+   
+   Each tier feels like a different print condition:
+   - Different ink density
+   - Different tracking
+   - MONUMENT gets micro-registration ghost
+───────────────────────────────────────────────────────────────────────────────── */
+
+/* Base specimen */
+.specimen-print {
+  position: relative;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   TIER 04: MONUMENT — Highest ink density + registration ghost
+   
+   The only tier with micro-registration ghost (1px offset at 3-5% opacity).
+   Feels like slightly over-inked press with minor misregistration.
+═══════════════════════════════════════════════════════════════════════════════ */
+
+.specimen-print--monument {
+  font-family: var(--font-grotesk);
+  font-size: var(--scale-04);
+  font-weight: 600;
+  font-stretch: 95%;
+  letter-spacing: var(--track-04);
+  line-height: 1.0;
+  text-transform: uppercase;
+  color: var(--ink-04);
+}
+
+/* Registration ghost — offset duplicate (MONUMENT only) */
+.specimen-ghost {
+  position: absolute;
+  top: 0;
+  left: 0;
+  color: transparent;
+  -webkit-text-stroke: 0;
+  opacity: var(--ghost-opacity);
+  transform: translate(var(--ghost-offset-x), var(--ghost-offset-y));
+  color: rgba(18, 16, 14, 1);
+  pointer-events: none;
+  user-select: none;
+}
+
+/* Primary text sits above ghost */
+.specimen-primary {
+  position: relative;
+  z-index: 1;
+}
+
+/* Heavy ink spread for monument */
+.specimen-print--monument .specimen-primary {
+  text-shadow: 
+    0 0 0.5px rgba(18, 16, 14, 0.18),
+    0 0 0.8px rgba(18, 16, 14, 0.10);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   TIER 03: STATE — Normal, crisp
+   
+   Reference print quality. No ghost, clean edges.
+═══════════════════════════════════════════════════════════════════════════════ */
+
+.specimen-print--state {
+  font-family: var(--font-grotesk);
+  font-size: var(--scale-03);
+  font-weight: 500;
+  letter-spacing: var(--track-03);
+  line-height: 1.15;
+  text-transform: uppercase;
+  color: var(--ink-03);
+  
+  /* Crisp, minimal spread */
+  text-shadow: 
+    0 0 0.3px rgba(18, 16, 14, 0.10),
+    0 0 0.5px rgba(18, 16, 14, 0.05);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   TIER 02: ARCHIVE — Lighter ink, tighter tracking
+   
+   Feels like slightly under-inked or aged print.
+═══════════════════════════════════════════════════════════════════════════════ */
+
+.specimen-print--archive {
+  font-family: var(--font-archive-serif);
+  font-size: var(--scale-02);
+  font-weight: 400;
+  letter-spacing: var(--track-02);
+  line-height: 1.4;
+  color: var(--ink-02);
+  
+  /* Light ink spread */
+  text-shadow: 
+    0 0 0.3px rgba(18, 16, 14, 0.08),
+    0 0 0.45px rgba(18, 16, 14, 0.04);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   TIER 01: LABEL — Lighter ink, wider tracking
+   
+   Feels like standard label printing with minor ink starvation.
+═══════════════════════════════════════════════════════════════════════════════ */
+
+.specimen-print--label {
+  font-family: var(--font-label);
+  font-size: var(--scale-01);
+  font-weight: 500;
+  letter-spacing: var(--track-01);
+  line-height: 1.4;
+  text-transform: uppercase;
+  color: var(--ink-01);
+  
+  /* Minimal ink spread */
+  text-shadow: 0 0 0.25px rgba(18, 16, 14, 0.06);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   TIER 00: MICRO — Lightest, borderline under-inked
+   
+   Feels like the ink barely transferred. Readable but faint.
+   No blur, no glow — just reduced density.
+═══════════════════════════════════════════════════════════════════════════════ */
+
+.specimen-print--micro {
+  font-family: var(--font-label);
+  font-size: var(--scale-00);
+  font-weight: 400;
+  letter-spacing: var(--track-00);
+  line-height: 1.4;
+  text-transform: uppercase;
+  color: var(--ink-00);
+  
+  /* Almost no spread — under-inked */
+  text-shadow: 0 0 0.2px rgba(18, 16, 14, 0.04);
+  
+  /* Intentional imperfection: slight offset */
+  margin-left: 2px;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────────
+   REDUCED MOTION
+───────────────────────────────────────────────────────────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  .paper-grain--breathe {
+    animation: none;
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────────
+   PRINT STYLES — Actual print output
+───────────────────────────────────────────────────────────────────────────────── */
+
+@media print {
+  .paper-grain,
+  .paper-vignette,
+  .paper-edge,
+  .crop-marks,
+  .annotation-field-guide {
+    display: none;
+  }
+  
+  .paper-surface {
+    background: white;
+  }
+  
+  .document-area {
+    padding: 1in;
+  }
+  
+  .specimen-ghost {
+    display: none;
+  }
+}

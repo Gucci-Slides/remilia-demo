@@ -1,0 +1,488 @@
+/* ═══════════════════════════════════════════════════════════════════════════════
+   DOCUMENT VIEWPORT SYSTEM
+   
+   Implements long-form scrolling that preserves the "paper document" illusion.
+   The viewport does not scroll like a website — the document advances under
+   fixed margins.
+   
+   STRUCTURE:
+   - DocumentViewport (container)
+     - FixedMarginsLayer (never moves)
+       - crop marks, paper texture, header/footer, spine rule, right margin rule
+     - FlowLayer (moves with native scroll)
+       - sections, baseline rows, content
+   
+   KEY PRINCIPLE: Content scrolls beneath a fixed overlay of margins and marks.
+═══════════════════════════════════════════════════════════════════════════════ */
+
+/* ─────────────────────────────────────────────────────────────────────────────────
+   ROOT TOKENS — Viewport-specific
+───────────────────────────────────────────────────────────────────────────────── */
+
+:root {
+  /* Viewport margins */
+  --vp-margin-outer: clamp(24px, 5vw, 64px);
+  --vp-margin-right: 240px;
+  --vp-spine-offset: 72px;
+  
+  /* Rule positions */
+  --vp-spine-left: calc(var(--vp-margin-outer) + var(--vp-spine-offset));
+  --vp-right-rule: calc(100% - var(--vp-margin-outer) - var(--vp-margin-right));
+  
+  /* Ref ink states */
+  --vp-ink-ref-active: rgba(18, 16, 14, 0.65);
+  --vp-ink-ref-inactive: rgba(18, 16, 14, 0.35);
+  
+  /* Page break */
+  --vp-page-break-ink: rgba(18, 16, 14, 0.12);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────────
+   DOCUMENT VIEWPORT — Main container
+───────────────────────────────────────────────────────────────────────────────── */
+
+.document-viewport {
+  position: relative;
+  min-height: 100svh;
+  background: var(--paper-base);
+  
+  /* Force light mode */
+  color-scheme: light only;
+  
+  /* Subtle vignette */
+  background-image: 
+    radial-gradient(
+      ellipse 80% 60% at 50% 45%,
+      var(--paper-warmth) 0%,
+      transparent 70%
+    ),
+    radial-gradient(
+      ellipse 120% 100% at 50% 50%,
+      transparent 40%,
+      rgba(30, 25, 20, 0.03) 80%,
+      rgba(25, 20, 15, 0.05) 100%
+    );
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────────
+   FIXED MARGINS LAYER — Never moves
+   
+   Contains: crop marks, texture, header/footer microblocks, rules
+───────────────────────────────────────────────────────────────────────────────── */
+
+.fixed-margins-layer {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 100;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────────
+   SPINE RULE — Left vertical line
+───────────────────────────────────────────────────────────────────────────────── */
+
+.spine-rule {
+  position: absolute;
+  left: var(--vp-spine-left);
+  top: var(--vp-margin-outer);
+  bottom: var(--vp-margin-outer);
+  width: 1px;
+  background: rgba(18, 16, 14, 0.08);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────────
+   RIGHT MARGIN RULE — Marks annotation field boundary
+───────────────────────────────────────────────────────────────────────────────── */
+
+.right-margin-rule {
+  position: absolute;
+  right: calc(var(--vp-margin-outer) + var(--vp-margin-right));
+  top: var(--vp-margin-outer);
+  bottom: var(--vp-margin-outer);
+  width: 1px;
+  background: rgba(18, 16, 14, 0.06);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────────
+   HEADER MICROBLOCK — Top-left fixed
+───────────────────────────────────────────────────────────────────────────────── */
+
+.header-microblock {
+  position: absolute;
+  top: var(--vp-margin-outer);
+  left: var(--vp-margin-outer);
+  
+  font-family: var(--font-label);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-identifier);
+  line-height: calc(var(--baseline-unit) * 2);
+}
+
+.header-microblock-line {
+  display: block;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────────
+   FOOTER MICROBLOCK — Bottom-left fixed
+───────────────────────────────────────────────────────────────────────────────── */
+
+.footer-microblock {
+  position: absolute;
+  bottom: var(--vp-margin-outer);
+  left: var(--vp-margin-outer);
+  
+  font-family: var(--font-label);
+  font-size: 10px;
+  font-weight: 400;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-light);
+  line-height: calc(var(--baseline-unit) * 2);
+}
+
+.footer-microblock-line {
+  display: block;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────────
+   RIGHT MARGIN REFS — Fixed refs that update per section
+───────────────────────────────────────────────────────────────────────────────── */
+
+.right-margin-refs {
+  position: absolute;
+  top: 50%;
+  right: var(--vp-margin-outer);
+  transform: translateY(-50%);
+  width: calc(var(--vp-margin-right) - 24px);
+  
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: calc(var(--baseline-unit) * 1);
+}
+
+.margin-ref {
+  font-family: var(--font-label);
+  font-size: var(--scale-00);
+  font-weight: 400;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  text-align: right;
+  
+  /* Default: inactive */
+  color: var(--vp-ink-ref-inactive);
+  
+  /* No animation, just state */
+  transition: color 150ms ease-out;
+}
+
+.margin-ref--active {
+  color: var(--vp-ink-ref-active);
+}
+
+.margin-ref--prev,
+.margin-ref--next {
+  color: var(--vp-ink-ref-inactive);
+  opacity: 0.7;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────────
+   FLOW LAYER — Scrolling content container
+───────────────────────────────────────────────────────────────────────────────── */
+
+.flow-layer {
+  position: relative;
+  z-index: 10;
+  
+  /* Native scroll */
+  overflow-y: auto;
+  overflow-x: hidden;
+  
+  /* Page-like margins */
+  padding: var(--vp-margin-outer);
+  padding-left: calc(var(--vp-spine-left) + 24px);
+  padding-right: calc(var(--vp-margin-outer) + var(--vp-margin-right) + 24px);
+  
+  /* Minimum height */
+  min-height: 100svh;
+}
+
+/* Flow layer content wrapper */
+.flow-content {
+  max-width: 680px;
+  padding-top: calc(var(--baseline-unit) * 12);
+  padding-bottom: calc(var(--baseline-unit) * 16);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────────
+   DOC SECTION — Individual content section
+───────────────────────────────────────────────────────────────────────────────── */
+
+.doc-section {
+  position: relative;
+  padding-top: calc(var(--baseline-unit) * 6);
+  padding-bottom: calc(var(--baseline-unit) * 4);
+}
+
+/* Section with baseline alignment */
+.doc-section--baseline {
+  padding-bottom: calc(var(--baseline-unit) * 2);
+  border-bottom: 1px dotted var(--rule-faint);
+}
+
+/* Dotted baseline rule */
+.doc-section::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 1px;
+  background: repeating-linear-gradient(
+    90deg,
+    var(--rule-faint) 0px,
+    var(--rule-faint) 2px,
+    transparent 2px,
+    transparent 8px
+  );
+  opacity: 0.7;
+}
+
+/* Section meta (inline ref visible on mobile) */
+.doc-section-meta {
+  display: none;
+  padding-top: calc(var(--baseline-unit) * 1);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────────
+   PAGE BREAK — Soft page separation
+───────────────────────────────────────────────────────────────────────────────── */
+
+.page-break {
+  position: relative;
+  padding: calc(var(--baseline-unit) * 8) 0;
+  margin: calc(var(--baseline-unit) * 4) 0;
+}
+
+/* Horizontal tick line */
+.page-break::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 1px;
+  background: var(--vp-page-break-ink);
+}
+
+/* Page number label */
+.page-break-label {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  padding-left: calc(var(--baseline-unit) * 2);
+  background: var(--paper-base);
+  
+  font-family: var(--font-label);
+  font-size: var(--scale-00);
+  font-weight: 400;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-00);
+}
+
+/* Grain shift below page break */
+.page-break + .doc-section {
+  /* Slightly different grain via filter */
+  filter: contrast(1.002);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────────
+   PAPER TEXTURE OVERLAY — Fixed layer
+───────────────────────────────────────────────────────────────────────────────── */
+
+.paper-texture-overlay {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  mix-blend-mode: multiply;
+  
+  /* Multi-layer grain pattern */
+  background-image:
+    /* Layer 1: Fine horizontal fibers */
+    repeating-linear-gradient(
+      0deg,
+      transparent 0px,
+      transparent 2px,
+      rgba(120, 110, 100, var(--grain-a)) 2px,
+      transparent 3px
+    ),
+    /* Layer 2: Vertical micro-fibers */
+    repeating-linear-gradient(
+      90deg,
+      transparent 0px,
+      transparent 3px,
+      rgba(100, 95, 85, var(--grain-b)) 3px,
+      transparent 4px
+    ),
+    /* Layer 3: Scattered dots */
+    radial-gradient(circle at 20% 30%, rgba(90, 85, 75, 0.012) 0.5px, transparent 0.5px),
+    radial-gradient(circle at 80% 70%, rgba(100, 95, 85, 0.010) 0.5px, transparent 0.5px);
+    
+  background-size:
+    100% 100%,
+    100% 100%,
+    200px 200px,
+    180px 180px;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────────
+   CROP MARKS — Fixed corners
+───────────────────────────────────────────────────────────────────────────────── */
+
+.viewport-crop-marks {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 101;
+}
+
+.viewport-crop-mark {
+  position: absolute;
+  pointer-events: none;
+}
+
+.viewport-crop-mark::before {
+  content: '';
+  position: absolute;
+  width: 14px;
+  height: 1px;
+  background: var(--crop-color);
+}
+
+.viewport-crop-mark::after {
+  content: '';
+  position: absolute;
+  width: 1px;
+  height: 14px;
+  background: var(--crop-color);
+}
+
+/* Corner positions */
+.viewport-crop-mark--tl {
+  top: var(--crop-offset);
+  left: var(--crop-offset);
+}
+.viewport-crop-mark--tl::before { top: 0; left: 0; }
+.viewport-crop-mark--tl::after { top: 0; left: 0; }
+
+.viewport-crop-mark--tr {
+  top: var(--crop-offset);
+  right: var(--crop-offset);
+}
+.viewport-crop-mark--tr::before { top: 0; right: 0; }
+.viewport-crop-mark--tr::after { top: 0; right: 0; }
+
+.viewport-crop-mark--br {
+  bottom: var(--crop-offset);
+  right: var(--crop-offset);
+}
+.viewport-crop-mark--br::before { bottom: 0; right: 0; }
+.viewport-crop-mark--br::after { bottom: 0; right: 0; }
+
+.viewport-crop-mark--bl {
+  bottom: var(--crop-offset);
+  left: var(--crop-offset);
+}
+.viewport-crop-mark--bl::before { bottom: 0; left: 0; }
+.viewport-crop-mark--bl::after { bottom: 0; left: 0; }
+
+/* ─────────────────────────────────────────────────────────────────────────────────
+   RESPONSIVE — Tablet (768–1023px)
+───────────────────────────────────────────────────────────────────────────────── */
+
+@media (max-width: 1023px) {
+  :root {
+    --vp-margin-right: 180px;
+  }
+  
+  .right-margin-refs {
+    width: calc(var(--vp-margin-right) - 16px);
+  }
+  
+  .viewport-crop-mark::before,
+  .viewport-crop-mark::after {
+    opacity: 0.7;
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────────
+   RESPONSIVE — Mobile (< 768px)
+───────────────────────────────────────────────────────────────────────────────── */
+
+@media (max-width: 767px) {
+  :root {
+    --vp-margin-right: 0px;
+    --vp-margin-outer: clamp(16px, 4vw, 32px);
+    --vp-spine-offset: 0px;
+  }
+  
+  /* Hide right margin refs */
+  .right-margin-refs {
+    display: none;
+  }
+  
+  /* Hide right margin rule */
+  .right-margin-rule {
+    display: none;
+  }
+  
+  /* Show inline refs on mobile */
+  .doc-section-meta {
+    display: block;
+  }
+  
+  /* Adjust flow layer padding */
+  .flow-layer {
+    padding-left: var(--vp-margin-outer);
+    padding-right: var(--vp-margin-outer);
+  }
+  
+  /* Keep spine rule only if space permits */
+  .spine-rule {
+    left: var(--vp-margin-outer);
+    opacity: 0.5;
+  }
+  
+  /* Reduce crop mark visibility */
+  .viewport-crop-mark::before,
+  .viewport-crop-mark::after {
+    opacity: 0.4;
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────────
+   PRINT STYLES
+───────────────────────────────────────────────────────────────────────────────── */
+
+@media print {
+  .fixed-margins-layer,
+  .paper-texture-overlay,
+  .viewport-crop-marks,
+  .right-margin-refs {
+    display: none;
+  }
+  
+  .document-viewport {
+    background: white;
+  }
+  
+  .flow-layer {
+    padding: 1in;
+  }
+}

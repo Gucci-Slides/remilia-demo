@@ -17,60 +17,88 @@
    If files are missing, fallbacks will be used automatically.
 ───────────────────────────────────────────────────────────── */
 
-/* ITC Benguiat — Monument / Logo / Ritual Moments */
-@font-face {
-  font-family: "ITC Benguiat";
-  src: url("/fonts/ITCBenguiat-Book.woff2") format("woff2");
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: "ITC Benguiat";
-  src: url("/fonts/ITCBenguiat-Bold.woff2") format("woff2");
-  font-weight: 700;
-  font-style: normal;
-  font-display: swap;
-}
-
-/* Canela — Editorial Headings / Inscriptions */
-@font-face {
-  font-family: "Canela";
-  src: url("/fonts/Canela-Light.woff2") format("woff2");
-  font-weight: 300;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: "Canela";
-  src: url("/fonts/Canela-Regular.woff2") format("woff2");
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: "Canela";
-  src: url("/fonts/Canela-Medium.woff2") format("woff2");
-  font-weight: 500;
-  font-style: normal;
-  font-display: swap;
-}
+/* ─────────────────────────────────────────────────────────────
+   ALL FONTS LOADED VIA next/font/google
+   
+   LOCKED TYPEFACE STACK (FREE ONLY):
+   - LABEL: IBM Plex Mono (--font-mono)
+   - STATE: Inter (--font-meta)
+   - MONUMENT: DM Serif Display (--font-monument-fallback)
+   - ARCHIVE: Spectral (--font-archive)
+   
+   NO PAID FONTS. NO EXCEPTIONS.
+───────────────────────────────────────────────────────────── */
 
 :root {
   /* ─────────────────────────────────────────────────────────────
-     FONT STACK (Strict Usage)
-
-     A. Monument: ITC Benguiat — wordmarks, monumental statements
-     B. Editorial: Canela — headings, inscriptions, narrative
-     C. Meta: Inter — metadata, labels, navigation hints
+     DOCUMENT TYPEFACE STACK — FREE FONTS ONLY (via next/font/google)
+     
+     TIER I   LABEL:    IBM Plex Mono (--font-mono)
+     TIER II  STATE:    Inter (--font-sans) — system status
+     TIER III MONUMENT: Inter (--font-sans) — legal header (wide tracking)
+     TIER IV  ARCHIVE:  Source Serif 4 (--font-archive)
+     
+     NO PAID FONTS. NO EXCEPTIONS.
   ───────────────────────────────────────────────────────────── */
+  --font-label: var(--font-mono), "IBM Plex Mono", ui-monospace, monospace;
+  --font-grotesk: var(--font-sans), "Inter", system-ui, sans-serif;
+  --font-archive-serif: var(--font-archive), "Source Serif 4", Georgia, serif;
 
-  --font-monument: "ITC Benguiat", "Georgia", "Times New Roman", serif;
-  --font-editorial: "Canela", "Georgia", "Times New Roman", serif;
-  /* --font-meta is set by Next.js font loader (Inter) */
+  /* ─────────────────────────────────────────────────────────────
+     INK CONTRAST MODEL (ARCHIVAL DOCUMENT — RE-INKED)
+     
+     5-band ink system for print-quality hierarchy:
+     --bg:    warm paper
+     --ink-1: primary ink (MONUMENT)
+     --ink-2: secondary ink (STATE)
+     --ink-3: tertiary ink (ARCHIVE + data)
+     --ink-4: annotation ink (LABEL/MICRO + role labels)
+     --line:  drafting guides
+  ───────────────────────────────────────────────────────────── */
+  --bg: #f3f1ec;
+  --ink-1: rgba(20, 20, 20, 0.95);
+  --ink-2: rgba(20, 20, 20, 0.78);
+  --ink-3: rgba(20, 20, 20, 0.62);
+  --ink-4: rgba(20, 20, 20, 0.52);
+  --line: rgba(20, 20, 20, 0.16);
+  
+  /* Legacy mappings */
+  --fg: var(--ink-1);
+  --muted: var(--ink-4);
+  --dim: rgba(20, 20, 20, 0.22);
+
+  /* ─────────────────────────────────────────────────────────────
+     TYPE SCALE TOKENS — Modular Scale (root 16, ratio 1.25)
+  ───────────────────────────────────────────────────────────── */
+  --scale-04: clamp(38px, 3.6vw, 48px);  /* MONUMENT — constrained */
+  --scale-03: 22px;                     /* STATE */
+  --scale-02: 16px;                     /* ARCHIVE */
+  --scale-01: 12px;                     /* LABEL */
+  --scale-00: 10px;                     /* MICRO */
+
+  /* ─────────────────────────────────────────────────────────────
+     REMILIA WORDMARK TOKENS
+     
+     Split wordmark: RE (serif) / MIL (sans) / IA (serif, drifted)
+     
+     IA DRIFT PHILOSOPHY:
+     The eye should subconsciously register: "Why does the end feel late?"
+     IA arrives slightly after where it should be — in time, space, and weight.
+     
+     Tunable parameters:
+     - --rm-wordmark-size: Base font size
+     - --rm-wordmark-color: Text color
+     - --rm-ia-opacity: IA fade (88–90% = feels present but receding)
+     - --rm-ia-baseline-shift: IA vertical drift (+2px = perceptible delay)
+     - --rm-ia-gap: Hesitation gap before IA (+8–12px = "late")
+     - --rm-ia-scale: IA size reduction (−1–2% = slight diminishment)
+  ───────────────────────────────────────────────────────────── */
+  --rm-wordmark-size: clamp(80px, 10vw, 160px);
+  --rm-wordmark-color: #0a0a0a;
+  --rm-ia-opacity: 0.89;
+  --rm-ia-baseline-shift: 2px;
+  --rm-ia-gap: clamp(8px, 1vw, 12px);
+  --rm-ia-scale: 0.98;
 
   /* ─────────────────────────────────────────────────────────────
      RHYTHM UNIT
@@ -561,6 +589,182 @@ body {
 }
 
 /* ═══════════════════════════════════════════════════════════════
+   OVERPRINT ARCHIVE — Title Page Texture System
+   
+   Flyer grain (halftone speckle), vignette, and ink behavior.
+   Feels like scanned print ephemera, not digital UI.
+═══════════════════════════════════════════════════════════════ */
+
+:root {
+  /* Overprint Archive Tokens */
+  --archive-paper: #F3EEE6;
+  --remilia-red: #E10600;
+  
+  /* Baseline grid (responsive) */
+  --baseline: 12px;
+  
+  /* Layout anchors */
+  --archive-left: 7vw;
+  --archive-bottom: 10vh;
+}
+
+@media (max-width: 768px) {
+  :root {
+    --baseline: 10px;
+    --archive-left: 6vw;
+    --archive-bottom: 12vh;
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────
+   FLYER GRAIN OVERLAY
+   
+   Halftone-ish speckle via layered radial gradients.
+   NOT film noise, NOT scanlines — textured print paper.
+───────────────────────────────────────────────────────────── */
+.flyer-grain-overlay {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  
+  /* Layer 1: Fine halftone speckle */
+  background-image: 
+    /* Micro dots (halftone effect) */
+    radial-gradient(circle at 25% 25%, rgba(0,0,0,0.015) 1px, transparent 1px),
+    radial-gradient(circle at 75% 75%, rgba(0,0,0,0.012) 1px, transparent 1px),
+    radial-gradient(circle at 50% 50%, rgba(0,0,0,0.008) 0.5px, transparent 0.5px),
+    /* Larger scattered spots */
+    radial-gradient(circle at 10% 90%, rgba(0,0,0,0.02) 2px, transparent 2px),
+    radial-gradient(circle at 85% 20%, rgba(0,0,0,0.018) 1.5px, transparent 1.5px),
+    /* SVG noise base */
+    url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='grain'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23grain)'/%3E%3C/svg%3E");
+  background-size: 
+    8px 8px,
+    12px 12px,
+    4px 4px,
+    80px 80px,
+    60px 60px,
+    200px 200px;
+  mix-blend-mode: multiply;
+  opacity: 0.08;
+}
+
+/* Grain intensity modifier (for scroll animation) */
+.flyer-grain-overlay[data-intensity="high"] {
+  opacity: 0.13;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   VIGNETTE OVERLAY
+   
+   Faint edge-darkening like scanned paper.
+───────────────────────────────────────────────────────────── */
+.archive-vignette {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 2;
+  background: radial-gradient(
+    ellipse 120% 100% at 50% 50%,
+    transparent 50%,
+    rgba(0, 0, 0, 0.04) 75%,
+    rgba(0, 0, 0, 0.10) 100%
+  );
+}
+
+/* ─────────────────────────────────────────────────────────────
+   RED INK BEHAVIOR
+   
+   Whenever red appears, treat it like overprinted ink:
+   - mix-blend-mode: multiply
+   - Slight blur for bleed effect
+   - No glow, no neon
+───────────────────────────────────────────────────────────── */
+.ink-red {
+  color: var(--remilia-red);
+  mix-blend-mode: multiply;
+  filter: blur(0.25px);
+}
+
+/* Stronger ink (for misregistered layers) */
+.ink-red-layer {
+  color: var(--remilia-red);
+  mix-blend-mode: multiply;
+  filter: blur(0.4px);
+}
+
+/* ─────────────────────────────────────────────────────────────
+   BASELINE GRID DEBUG OVERLAY (dev-only toggle)
+   
+   Horizontal lines every baseline unit.
+   Toggle with data-show-grid="true" on parent.
+───────────────────────────────────────────────────────────── */
+.baseline-grid-debug {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 0;
+  transition: opacity 0.2s;
+  background-image: 
+    repeating-linear-gradient(
+      to bottom,
+      transparent 0,
+      transparent calc(var(--baseline) - 1px),
+      rgba(255, 0, 0, 0.08) calc(var(--baseline) - 1px),
+      rgba(255, 0, 0, 0.08) var(--baseline)
+    );
+}
+
+[data-show-grid="true"] .baseline-grid-debug {
+  opacity: 1;
+}
+
+/* Vertical column guides (12-col) */
+.baseline-grid-debug::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: 
+    repeating-linear-gradient(
+      to right,
+      transparent 0,
+      transparent calc(100% / 12 - 1px),
+      rgba(0, 100, 255, 0.05) calc(100% / 12 - 1px),
+      rgba(0, 100, 255, 0.05) calc(100% / 12)
+    );
+}
+
+/* ─────────────────────────────────────────────────────────────
+   STAMP TEXT (metadata style)
+   
+   Tiny, tracked, institutional.
+───────────────────────────────────────────────────────────── */
+.stamp-text {
+  font-family: var(--font-mono), 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(0, 0, 0, 0.65);
+  line-height: var(--baseline);
+}
+
+/* ─────────────────────────────────────────────────────────────
+   NARRATIVE TEXT (editorial voice on baseline grid)
+───────────────────────────────────────────────────────────── */
+.narrative-text {
+  font-family: var(--font-editorial), 'Cormorant Garamond', Georgia, serif;
+  font-size: clamp(18px, 2vw, 24px);
+  font-weight: 400;
+  letter-spacing: 0.01em;
+  line-height: calc(var(--baseline) * 2.5);
+  color: #0a0a0a;
+  max-width: 44ch;
+}
+
+/* ═══════════════════════════════════════════════════════════════
    LAYOUT & RHYTHM RULES
 
    - All text snaps to a vertical rhythm grid
@@ -1009,5 +1213,667 @@ h3.font-display {
   }
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   MEMORY CARD SYSTEM — PS1 State Persistence UI
+   
+   Navigation = loading saved states.
+   This is not a menu. This is state persistence UI.
+═══════════════════════════════════════════════════════════════════════════════ */
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   SCROLLBAR HIDING — For narrative content
+───────────────────────────────────────────────────────────────────────────── */
+.memory-narrative-scroll {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE/Edge */
+}
+
+.memory-narrative-scroll::-webkit-scrollbar {
+  display: none; /* Chrome/Safari/Opera */
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   MEMORY CARD BUTTON — No hover effects
+───────────────────────────────────────────────────────────────────────────── */
+.memory-card-button {
+  transition: none;
+}
+
+.memory-card-button:hover {
+  transform: none;
+  box-shadow: none;
+  background: rgba(0, 0, 0, 0.02);
+}
+
+.memory-card-button:active {
+  transform: none;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   SAVE BLOCK ITEMS — Cursor change only, no animation
+───────────────────────────────────────────────────────────────────────────── */
+.save-block-item {
+  transition: none;
+}
+
+.save-block-item:hover {
+  transform: none;
+  background: transparent;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   SYSTEM FLICKER KEYFRAMES — For manual triggering if needed
+───────────────────────────────────────────────────────────────────────────── */
+@keyframes systemFlicker {
+  0% {
+    opacity: 1;
+  }
+  45% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
+  55% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   MOBILE MEMORY CARD — Responsive adjustments
+───────────────────────────────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  :root {
+    --archive-left: 6vw;
+    --archive-bottom: 8vh;
+  }
+  
+  .memory-card-panel-mobile {
+    padding: calc(var(--baseline) * 3);
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   REDUCED MOTION — Respect user preferences
+───────────────────────────────────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .memory-system-transition {
+    transition: none;
+  }
+  
+  .memory-flicker {
+    animation: none;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   BOOT SMILEY / CRT OVERLAY SYSTEM
+   
+   PS1/Bootloader aesthetic with scanlines, glow, and analog imperfections.
+   This is not a website element. This is a system artifact.
+═══════════════════════════════════════════════════════════════════════════════ */
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   CRT GLOW — Phosphor bloom effect
+───────────────────────────────────────────────────────────────────────────── */
+.crt-glow {
+  text-shadow: 
+    0 0 4px currentColor,
+    0 0 8px currentColor,
+    0 0 16px rgba(0, 255, 65, 0.4);
+  filter: brightness(1.1);
+}
+
+.crt-glow-strong {
+  text-shadow: 
+    0 0 2px currentColor,
+    0 0 6px currentColor,
+    0 0 12px currentColor,
+    0 0 24px rgba(0, 255, 65, 0.5);
+  filter: brightness(1.2) contrast(1.05);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   CRT SCANLINES — Horizontal interference pattern
+───────────────────────────────────────────────────────────────────────────── */
+.crt-scanlines {
+  position: relative;
+}
+
+.crt-scanlines::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0, 0, 0, 0.12) 2px,
+    rgba(0, 0, 0, 0.12) 4px
+  );
+  z-index: 10;
+}
+
+/* Dense scanlines for smaller elements */
+.crt-scanlines-dense::after {
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 1px,
+    rgba(0, 0, 0, 0.15) 1px,
+    rgba(0, 0, 0, 0.15) 2px
+  );
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   CRT FLICKER — Subtle analog instability
+───────────────────────────────────────────────────────────────────────────── */
+@keyframes crt-flicker {
+  0%, 100% {
+    opacity: 1;
+  }
+  3% {
+    opacity: 0.97;
+  }
+  6% {
+    opacity: 1;
+  }
+  42% {
+    opacity: 1;
+  }
+  44% {
+    opacity: 0.94;
+  }
+  46% {
+    opacity: 1;
+  }
+  87% {
+    opacity: 1;
+  }
+  89% {
+    opacity: 0.96;
+  }
+  91% {
+    opacity: 1;
+  }
+}
+
+.crt-flicker {
+  animation: crt-flicker 8s ease-in-out infinite;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   CRT JITTER — Micro-displacement for analog feel
+───────────────────────────────────────────────────────────────────────────── */
+@keyframes crt-jitter {
+  0%, 100% {
+    transform: translate(0, 0);
+  }
+  10% {
+    transform: translate(0.3px, 0);
+  }
+  20% {
+    transform: translate(-0.3px, 0.3px);
+  }
+  30% {
+    transform: translate(0, -0.3px);
+  }
+  40% {
+    transform: translate(0.3px, 0.3px);
+  }
+  50% {
+    transform: translate(-0.3px, 0);
+  }
+  60% {
+    transform: translate(0.3px, -0.3px);
+  }
+  70% {
+    transform: translate(0, 0.3px);
+  }
+  80% {
+    transform: translate(-0.3px, -0.3px);
+  }
+  90% {
+    transform: translate(0.3px, 0);
+  }
+}
+
+.crt-jitter {
+  animation: crt-jitter 6s linear infinite;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   BOOT TEXT REVEAL — Line-by-line typing effect
+───────────────────────────────────────────────────────────────────────────── */
+@keyframes boot-line-reveal {
+  from {
+    opacity: 0;
+    transform: translateX(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.boot-line-reveal {
+  animation: boot-line-reveal 0.08s ease-out forwards;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   BOOT SYSTEM COLORS
+───────────────────────────────────────────────────────────────────────────── */
+:root {
+  --boot-green: #00ff41;
+  --boot-amber: #ffb000;
+  --boot-cyan: #00ffff;
+  --boot-white: #e0e0e0;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   REDUCED MOTION — Respect user preferences
+───────────────────────────────────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .crt-flicker,
+  .crt-jitter,
+  .boot-line-reveal {
+    animation: none;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   INSTITUTIONAL SPLASH — TYPE-FIRST SYSTEM
+   
+   This is not a marketing page. This is an indifferent system.
+   Four-tier typographic hierarchy with procedural aesthetics.
+   
+   LOCKED FONTS (ALL FREE):
+   - LABEL: IBM Plex Mono
+   - STATE: Inter  
+   - MONUMENT: DM Serif Display
+   - ARCHIVE: Spectral
+═══════════════════════════════════════════════════════════════════════════════ */
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   TIER I — LABEL (IBM Plex Mono)
+   
+   UPPERCASE ONLY
+   11–13px, letter-spacing +0.06em to +0.1em
+   Uses: var(--muted) — visible but subdued
+───────────────────────────────────────────────────────────────────────────── */
+.t-label,
+.inst-label {
+  font-family: var(--font-label);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  line-height: 1.4;
+  color: var(--muted);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   TIER II — STATE (Inter)
+   
+   UPPERCASE, Medium/Semibold weight
+   14–18px, tracking +0.02em to +0.06em
+   Uses: high-contrast white for system status legibility
+───────────────────────────────────────────────────────────────────────────── */
+.t-state,
+.inst-state {
+  font-family: var(--font-state);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.72);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   TIER III — MONUMENT (DM Serif Display)
+   
+   UPPERCASE ONLY
+   Very large scale via clamp()
+   Tight line-height (1.0–1.1), negative tracking (-0.01em)
+   Uses: --fg-monument for authority-level visibility
+   Subtle text-shadow for edge separation (NOT a glow)
+───────────────────────────────────────────────────────────────────────────── */
+.t-monument,
+.inst-monument {
+  font-family: var(--font-monument);
+  font-size: clamp(3.5rem, 14vw, 11rem);
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  line-height: 1.0;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.26);
+  /* Subtle edge separation — NOT a glow stack */
+  text-shadow: 
+    0 1px 0 rgba(0, 0, 0, 0.5),
+    0 0 1px rgba(255, 255, 255, 0.06);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   TIER IV — ARCHIVE (Spectral)
+   
+   Sentence case or uppercase
+   14–16px, line-height 1.6–1.8
+   Uses: var(--muted) — readable on inspection
+───────────────────────────────────────────────────────────────────────────── */
+.t-archive,
+.inst-archive {
+  font-family: var(--font-archive-text);
+  font-size: 14px;
+  font-weight: 400;
+  letter-spacing: 0.01em;
+  line-height: 1.7;
+  color: var(--muted);
+}
+
+.inst-archive-entry {
+  font-family: var(--font-archive-text);
+  font-size: 14px;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  line-height: 1.8;
+  color: var(--muted);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   SCALE SPECIMEN CLASSES — For type calibration panel
+───────────────────────────────────────────────────────────────────────────── */
+.spec-monument {
+  font-family: var(--font-monument);
+  font-size: var(--scale-monument-spec);
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  line-height: 1.1;
+  text-transform: uppercase;
+  color: var(--fg);
+}
+
+.spec-state {
+  font-family: var(--font-state);
+  font-size: var(--scale-state);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  line-height: 1.4;
+  color: var(--fg);
+}
+
+.spec-label {
+  font-family: var(--font-label);
+  font-size: var(--scale-label);
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  line-height: 1.4;
+  color: var(--muted);
+}
+
+.spec-archive {
+  font-family: var(--font-archive-text);
+  font-size: var(--scale-archive);
+  font-weight: 400;
+  letter-spacing: 0.01em;
+  line-height: 1.6;
+  color: var(--muted);
+}
+
+/* Micro legend — annotation tier */
+.micro-legend {
+  font-family: var(--font-label);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  line-height: 2.0;
+  color: var(--ink-4);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   SCALE LADDER — Institutional typographic calibration
+───────────────────────────────────────────────────────────────────────────── */
+
+/* Scale row container */
+.scale-row {
+  position: relative;
+  display: grid;
+  grid-template-columns: 72px 1fr 80px;
+  align-items: baseline;
+  gap: 24px;
+  padding: 20px 0;
+}
+
+
+/* Scale index (left side) — DATA, subordinate to MONUMENT */
+.scale-index {
+  font-family: var(--font-label);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  opacity: 0.85;
+  text-align: right;
+  padding-right: 16px;
+}
+
+/* Role label (right side) — ANNOTATION */
+.scale-role {
+  font-family: var(--font-label);
+  font-size: 9px;
+  font-weight: 400;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-4);
+  text-align: left;
+  padding-left: 16px;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   SPECIMEN TEXT PER TIER — Explicit contrast assignments
+   
+   MONUMENT: var(--fg) — primary anchor, immediately legible
+   STATE: var(--fg) — secondary anchor, clear
+   ARCHIVE: var(--muted) — readable on inspection
+   LABEL: var(--muted) — visible but subdued
+   MICRO: var(--muted) — quiet
+───────────────────────────────────────────────────────────────────────────── */
+.specimen-monument {
+  font-family: var(--font-grotesk);
+  font-size: var(--scale-04);
+  font-weight: 600;
+  font-stretch: 93%;
+  letter-spacing: 0.14em;
+  line-height: 1.0;
+  text-transform: uppercase;
+  color: var(--ink-1);
+  -webkit-font-smoothing: antialiased;
+  
+  /* Ink spread + registration ghost */
+  text-shadow: 
+    0 0 0.5px rgba(18, 16, 14, 0.16),
+    0 0 0.8px rgba(18, 16, 14, 0.08),
+    1px 0.5px 0 rgba(18, 16, 14, 0.035);
+}
+
+.specimen-state {
+  font-family: var(--font-grotesk);
+  font-size: var(--scale-03);
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  line-height: 1.15;
+  text-transform: uppercase;
+  color: var(--ink-2);
+  
+  /* Medium ink spread */
+  text-shadow: 
+    0 0 0.4px rgba(18, 16, 14, 0.12),
+    0 0 0.6px rgba(18, 16, 14, 0.06);
+}
+
+.specimen-archive {
+  font-family: var(--font-archive-serif);
+  font-size: var(--scale-02);
+  font-weight: 400;
+  letter-spacing: 0;
+  line-height: 1.4;
+  color: var(--ink-3);
+  
+  /* Light ink spread */
+  text-shadow: 
+    0 0 0.35px rgba(18, 16, 14, 0.10),
+    0 0 0.5px rgba(18, 16, 14, 0.05);
+}
+
+.specimen-label {
+  font-family: var(--font-label);
+  font-size: var(--scale-01);
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  line-height: 1.4;
+  text-transform: uppercase;
+  color: var(--ink-4);
+  
+  /* Minimal ink spread */
+  text-shadow: 0 0 0.3px rgba(18, 16, 14, 0.08);
+}
+
+.specimen-micro {
+  font-family: var(--font-label);
+  font-size: var(--scale-00);
+  font-weight: 400;
+  letter-spacing: 0.06em;
+  line-height: 1.4;
+  text-transform: uppercase;
+  color: var(--ink-4);
+  
+  /* Very light ink spread */
+  text-shadow: 0 0 0.25px rgba(18, 16, 14, 0.06);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   PAPER TEXTURE — Subtle grain only, de-hazed
+───────────────────────────────────────────────────────────────────────────── */
+.inst-noise {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0.025;
+  mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+.inst-scanlines {
+  display: none;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   CROP MARKS — Document registration marks (not UI border)
+───────────────────────────────────────────────────────────────────────────── */
+.crop-mark {
+  position: absolute;
+  pointer-events: none;
+}
+
+.crop-mark::before,
+.crop-mark::after {
+  content: "";
+  position: absolute;
+  background-color: var(--line);
+}
+
+/* Horizontal stroke */
+.crop-mark::before {
+  width: 16px;
+  height: 1px;
+}
+
+/* Vertical stroke */
+.crop-mark::after {
+  width: 1px;
+  height: 16px;
+}
+
+/* Corner positions */
+.crop-mark--tl::before { top: 0; left: 0; }
+.crop-mark--tl::after { top: 0; left: 0; }
+
+.crop-mark--tr::before { top: 0; right: 0; }
+.crop-mark--tr::after { top: 0; right: 0; }
+
+.crop-mark--br::before { bottom: 0; right: 0; }
+.crop-mark--br::after { bottom: 0; right: 0; }
+
+.crop-mark--bl::before { bottom: 0; left: 0; }
+.crop-mark--bl::after { bottom: 0; left: 0; }
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   MOTION — Controlled, non-playful (250–450ms range)
+───────────────────────────────────────────────────────────────────────────── */
+@keyframes inst-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes inst-axis-draw {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+
+.inst-animate-fade {
+  animation: inst-fade-in 320ms ease-in-out forwards;
+}
+
+.inst-animate-axis {
+  transform-origin: left center;
+  animation: inst-axis-draw 380ms ease-out forwards;
+}
+
+/* Staggered delays */
+.inst-delay-100 { animation-delay: 100ms; }
+.inst-delay-150 { animation-delay: 150ms; }
+.inst-delay-200 { animation-delay: 200ms; }
+.inst-delay-250 { animation-delay: 250ms; }
+.inst-delay-300 { animation-delay: 300ms; }
+.inst-delay-400 { animation-delay: 400ms; }
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   INTERACTION — Minimal (opacity/underline only)
+───────────────────────────────────────────────────────────────────────────── */
+.inst-nav-hotspot {
+  transition: opacity 0.15s ease;
+  cursor: pointer;
+}
+
+.inst-nav-hotspot:hover {
+  opacity: 0.6;
+}
+
+.inst-nav-hotspot:focus {
+  outline: 1px solid var(--line);
+  outline-offset: 4px;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   REDUCED MOTION
+───────────────────────────────────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .inst-animate-fade,
+  .inst-animate-axis {
+    animation: none;
+    opacity: 1;
+    transform: none;
   }
 }
