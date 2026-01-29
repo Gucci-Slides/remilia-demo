@@ -1,12 +1,17 @@
 /* ═══════════════════════════════════════════════════════════════════════════════
-   ARCHIVE INDEX STYLES
+   ARCHIVE SYSTEM STYLES
    
    Paper-native styling for the archive document system.
    Implements the "paper document rendered with CSS" aesthetic.
+   
+   SECTIONS:
+   1. Tokens
+   2. Threshold (entry calibration)
+   3. Archive Index (document table)
 ═══════════════════════════════════════════════════════════════════════════════ */
 
 /* ─────────────────────────────────────────────────────────────────────────────────
-   TOKENS — Archive-specific
+   §1 TOKENS — Archive-specific
 ───────────────────────────────────────────────────────────────────────────────── */
 
 :root {
@@ -19,6 +24,11 @@
   --ink-2: rgba(18, 16, 14, 0.62);
   --ink-3: rgba(18, 16, 14, 0.38);
   --ink-4: rgba(18, 16, 14, 0.22);
+  --ink-5: rgba(18, 16, 14, 0.12);
+  
+  /* Ink for hover states */
+  --ink-hover: rgba(18, 16, 14, 0.96);
+  --ink-demoted: rgba(18, 16, 14, 0.18);
   
   /* Rules */
   --rule: rgba(18, 16, 14, 0.10);
@@ -47,6 +57,489 @@
   --crop-offset: clamp(16px, 2.5vw, 28px);
   --crop-length: 12px;
   --crop-color: rgba(18, 16, 14, 0.10);
+  
+  /* Threshold-specific */
+  --threshold-ladder-top: clamp(160px, 20vh, 240px);
+  --threshold-tier-gap: clamp(24px, 4vh, 40px);
+  --threshold-tier-gap-compressed: clamp(12px, 2vh, 20px);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   §2 THRESHOLD — Type Scale Calibration Entry
+   
+   A calibration ritual. The user is measured, not welcomed.
+═══════════════════════════════════════════════════════════════════════════════ */
+
+/* ─────────────────────────────────────────────────────────────────────────────────
+   THRESHOLD CONTAINER — Paper field
+───────────────────────────────────────────────────────────────────────────────── */
+
+.threshold-container {
+  min-height: 100vh;
+  min-height: 100dvh;
+  background: var(--paper);
+  color-scheme: light only;
+  position: relative;
+  
+  /* Paper texture */
+  background-image:
+    radial-gradient(
+      ellipse 80% 60% at 50% 45%,
+      var(--paper-warm) 0%,
+      transparent 70%
+    ),
+    radial-gradient(
+      ellipse 120% 100% at 50% 50%,
+      transparent 40%,
+      rgba(30, 25, 20, 0.025) 80%,
+      rgba(25, 20, 15, 0.04) 100%
+    );
+}
+
+/* Grain overlay */
+.threshold-container::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  mix-blend-mode: multiply;
+  background-image:
+    repeating-linear-gradient(
+      0deg,
+      transparent 0px,
+      transparent 2px,
+      rgba(120, 110, 100, 0.015) 2px,
+      transparent 3px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      transparent 0px,
+      transparent 3px,
+      rgba(100, 95, 85, 0.010) 3px,
+      transparent 4px
+    );
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────────
+   THRESHOLD CROP MARKS
+───────────────────────────────────────────────────────────────────────────────── */
+
+.threshold-crop-marks {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.threshold-crop-mark {
+  position: absolute;
+}
+
+.threshold-crop-mark::before {
+  content: '';
+  position: absolute;
+  width: var(--crop-length);
+  height: 1px;
+  background: var(--crop-color);
+}
+
+.threshold-crop-mark::after {
+  content: '';
+  position: absolute;
+  width: 1px;
+  height: var(--crop-length);
+  background: var(--crop-color);
+}
+
+.threshold-crop-mark--tl {
+  top: var(--crop-offset);
+  left: var(--crop-offset);
+}
+.threshold-crop-mark--tl::before { top: 0; left: 0; }
+.threshold-crop-mark--tl::after { top: 0; left: 0; }
+
+.threshold-crop-mark--tr {
+  top: var(--crop-offset);
+  right: var(--crop-offset);
+}
+.threshold-crop-mark--tr::before { top: 0; right: 0; }
+.threshold-crop-mark--tr::after { top: 0; right: 0; }
+
+.threshold-crop-mark--br {
+  bottom: var(--crop-offset);
+  right: var(--crop-offset);
+}
+.threshold-crop-mark--br::before { bottom: 0; right: 0; }
+.threshold-crop-mark--br::after { bottom: 0; right: 0; }
+
+.threshold-crop-mark--bl {
+  bottom: var(--crop-offset);
+  left: var(--crop-offset);
+}
+.threshold-crop-mark--bl::before { bottom: 0; left: 0; }
+.threshold-crop-mark--bl::after { bottom: 0; left: 0; }
+
+/* ─────────────────────────────────────────────────────────────────────────────────
+   THRESHOLD RIGHT RULE
+───────────────────────────────────────────────────────────────────────────────── */
+
+.threshold-right-rule {
+  position: fixed;
+  right: calc(var(--archive-margin-x) + 140px);
+  top: var(--archive-margin-y);
+  bottom: var(--archive-margin-y);
+  width: 1px;
+  background: var(--grid);
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────────
+   THRESHOLD FIELD — Main content area
+───────────────────────────────────────────────────────────────────────────────── */
+
+.threshold-field {
+  position: relative;
+  width: var(--archive-page-width);
+  max-width: 100%;
+  min-height: 100vh;
+  min-height: 100dvh;
+  margin: 0 auto;
+  padding: var(--archive-margin-y) var(--archive-margin-x);
+  z-index: 2;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────────
+   THRESHOLD STAMP — Top left document identifier
+───────────────────────────────────────────────────────────────────────────────── */
+
+.threshold-stamp {
+  position: absolute;
+  top: var(--archive-margin-y);
+  left: var(--archive-margin-x);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.threshold-stamp-line {
+  font-family: var(--font-label);
+  font-size: var(--t00);
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  line-height: 1.6;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────────
+   THRESHOLD MARGIN LABELS — Right side tier indicators
+───────────────────────────────────────────────────────────────────────────────── */
+
+.threshold-margin-labels {
+  position: fixed;
+  right: var(--archive-margin-x);
+  top: var(--threshold-ladder-top);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  z-index: 5;
+  pointer-events: none;
+}
+
+.threshold-margin-label {
+  font-family: var(--font-label);
+  font-size: var(--t00);
+  font-weight: 400;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-4);
+  line-height: 1.4;
+  text-align: right;
+  white-space: nowrap;
+}
+
+/* Spacing to match tier ladder */
+.threshold-margin-label[data-tier="tier-iv"] {
+  margin-bottom: calc(var(--threshold-tier-gap) + 8px);
+}
+.threshold-margin-label[data-tier="tier-iii"] {
+  margin-bottom: calc(var(--threshold-tier-gap) + 4px);
+}
+.threshold-margin-label[data-tier="tier-ii"] {
+  margin-bottom: calc(var(--threshold-tier-gap) + 2px);
+}
+.threshold-margin-label[data-tier="tier-i"] {
+  margin-bottom: var(--threshold-tier-gap-compressed);
+}
+.threshold-margin-label[data-tier="tier-0"] {
+  /* No bottom margin for last tier */
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────────
+   THRESHOLD LADDER — Type scale demonstration
+───────────────────────────────────────────────────────────────────────────────── */
+
+.threshold-ladder {
+  display: flex;
+  flex-direction: column;
+  padding-top: var(--threshold-ladder-top);
+}
+
+/* Individual tier */
+.threshold-tier {
+  position: relative;
+}
+
+.threshold-tier-text {
+  display: block;
+  font-family: var(--font-grotesk);
+  text-transform: uppercase;
+  -webkit-font-smoothing: antialiased;
+  letter-spacing: 0.10em;
+}
+
+/* Tier IV — MONUMENT */
+.threshold-tier--monument {
+  margin-bottom: var(--threshold-tier-gap);
+}
+
+.threshold-tier--monument .threshold-tier-text {
+  font-size: var(--t04);
+  font-weight: 600;
+  color: var(--ink);
+  letter-spacing: 0.12em;
+  text-shadow: 0 0 0.5px rgba(18, 16, 14, 0.12);
+}
+
+/* Tier III — STATE */
+.threshold-tier--state {
+  margin-bottom: var(--threshold-tier-gap);
+}
+
+.threshold-tier--state .threshold-tier-text {
+  font-size: var(--t03);
+  font-weight: 500;
+  color: var(--ink-2);
+  letter-spacing: 0.10em;
+}
+
+/* Tier II — ARCHIVE */
+.threshold-tier--archive {
+  margin-bottom: var(--threshold-tier-gap);
+}
+
+.threshold-tier--archive .threshold-tier-text {
+  font-size: var(--t02);
+  font-weight: 500;
+  color: var(--ink-2);
+  letter-spacing: 0.08em;
+}
+
+/* Tier I — LABEL */
+.threshold-tier--label {
+  margin-bottom: var(--threshold-tier-gap-compressed);
+}
+
+.threshold-tier--label .threshold-tier-text {
+  font-size: var(--t01);
+  font-weight: 500;
+  color: var(--ink-3);
+  letter-spacing: 0.10em;
+}
+
+/* Tier 0 — MICRO */
+.threshold-tier--micro {
+  margin-bottom: var(--threshold-tier-gap-compressed);
+}
+
+.threshold-tier--micro .threshold-tier-text {
+  font-size: var(--t00);
+  font-weight: 400;
+  color: var(--ink-3);
+  letter-spacing: 0.12em;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────────
+   THRESHOLD HOVER — Ink density shifts (no movement)
+───────────────────────────────────────────────────────────────────────────────── */
+
+/* When hovering a tier, it intensifies */
+.threshold-tier:hover .threshold-tier-text {
+  color: var(--ink-hover);
+}
+
+/* When hovering, demote siblings */
+.threshold-ladder:has(.threshold-tier:hover) .threshold-tier:not(:hover) .threshold-tier-text {
+  color: var(--ink-demoted);
+}
+
+/* Corresponding margin labels respond to tier hover */
+.threshold-field:has(.threshold-tier[data-tier="tier-iv"]:hover) .threshold-margin-label[data-tier="tier-iv"],
+.threshold-field:has(.threshold-tier[data-tier="tier-iii"]:hover) .threshold-margin-label[data-tier="tier-iii"],
+.threshold-field:has(.threshold-tier[data-tier="tier-ii"]:hover) .threshold-margin-label[data-tier="tier-ii"],
+.threshold-field:has(.threshold-tier[data-tier="tier-i"]:hover) .threshold-margin-label[data-tier="tier-i"],
+.threshold-field:has(.threshold-tier[data-tier="tier-0"]:hover) .threshold-margin-label[data-tier="tier-0"] {
+  color: var(--ink-2);
+}
+
+/* Demote non-hovered margin labels */
+.threshold-field:has(.threshold-tier:hover) .threshold-margin-labels .threshold-margin-label {
+  color: var(--ink-5);
+}
+
+.threshold-field:has(.threshold-tier[data-tier="tier-iv"]:hover) .threshold-margin-label[data-tier="tier-iv"],
+.threshold-field:has(.threshold-tier[data-tier="tier-iii"]:hover) .threshold-margin-label[data-tier="tier-iii"],
+.threshold-field:has(.threshold-tier[data-tier="tier-ii"]:hover) .threshold-margin-label[data-tier="tier-ii"],
+.threshold-field:has(.threshold-tier[data-tier="tier-i"]:hover) .threshold-margin-label[data-tier="tier-i"],
+.threshold-field:has(.threshold-tier[data-tier="tier-0"]:hover) .threshold-margin-label[data-tier="tier-0"] {
+  color: var(--ink-2);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────────
+   THRESHOLD ENTRY — Inscription to proceed
+───────────────────────────────────────────────────────────────────────────────── */
+
+.threshold-entry {
+  margin-top: clamp(64px, 12vh, 120px);
+  padding-top: clamp(32px, 6vh, 56px);
+  border-top: 1px solid var(--rule);
+}
+
+.threshold-entry-inscription {
+  display: block;
+  font-family: var(--font-label);
+  font-size: var(--t01);
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  text-decoration: none;
+  
+  /* Non-interactive appearance */
+  cursor: default;
+}
+
+/* Subtle hover — slight ink increase, no animation */
+.threshold-entry-inscription:hover {
+  color: var(--ink-2);
+  cursor: pointer;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────────
+   THRESHOLD FOOTER
+───────────────────────────────────────────────────────────────────────────────── */
+
+.threshold-footer {
+  position: absolute;
+  bottom: var(--archive-margin-y);
+  left: var(--archive-margin-x);
+  right: var(--archive-margin-x);
+  
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding-top: calc(var(--baseline-unit, 8px) * 2);
+  border-top: 1px solid var(--grid);
+}
+
+.threshold-footer-left,
+.threshold-footer-right {
+  font-family: var(--font-label);
+  font-size: var(--t00);
+  font-weight: 400;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-4);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────────
+   THRESHOLD RESPONSIVE — Tablet
+───────────────────────────────────────────────────────────────────────────────── */
+
+@media (max-width: 1023px) {
+  .threshold-right-rule {
+    right: calc(var(--archive-margin-x) + 100px);
+  }
+  
+  .threshold-margin-labels {
+    right: calc(var(--archive-margin-x) - 8px);
+  }
+  
+  .threshold-margin-label {
+    font-size: 9px;
+    letter-spacing: 0.14em;
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────────
+   THRESHOLD RESPONSIVE — Mobile
+───────────────────────────────────────────────────────────────────────────────── */
+
+@media (max-width: 767px) {
+  :root {
+    --threshold-ladder-top: 120px;
+    --threshold-tier-gap: 20px;
+    --threshold-tier-gap-compressed: 10px;
+  }
+  
+  .threshold-right-rule {
+    display: none;
+  }
+  
+  .threshold-margin-labels {
+    display: none;
+  }
+  
+  .threshold-stamp {
+    position: relative;
+    top: auto;
+    left: auto;
+    margin-bottom: 24px;
+  }
+  
+  .threshold-field {
+    padding: 24px 16px;
+  }
+  
+  .threshold-ladder {
+    padding-top: 40px;
+  }
+  
+  .threshold-footer {
+    position: relative;
+    bottom: auto;
+    left: auto;
+    right: auto;
+    margin-top: 64px;
+  }
+  
+  .threshold-crop-mark::before,
+  .threshold-crop-mark::after {
+    opacity: 0.5;
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────────
+   THRESHOLD PRINT
+───────────────────────────────────────────────────────────────────────────────── */
+
+@media print {
+  .threshold-container::before,
+  .threshold-crop-marks,
+  .threshold-right-rule {
+    display: none;
+  }
+  
+  .threshold-container {
+    background: white;
+  }
+  
+  .threshold-margin-labels {
+    position: absolute;
+    right: 0;
+  }
 }
 
 /* ─────────────────────────────────────────────────────────────────────────────────

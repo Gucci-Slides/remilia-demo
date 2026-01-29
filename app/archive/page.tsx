@@ -1,127 +1,95 @@
 'use client';
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// ARCHIVE — DOCUMENT D0-0: ARCHIVE INDEX
+// ARCHIVE THRESHOLD — Type Scale Calibration
 //
-// The archive itself is the document. Reads as an index cover + index table.
-// Long-form paper document rendered with CSS.
+// A ritual calibration document. The user is measured, not welcomed.
+// Each tier announces itself. The scale is demonstrated before entry.
 //
-// STRUCTURE:
-// - Page 1: Cover header + first part of table
-// - Page 2: Continuation of table + footer
-//
-// NO "Typographic Constitution" intro — that content lives in D0-1.
+// NO animation. NO parallax. NO easing.
 // ═══════════════════════════════════════════════════════════════════════════════
 
 import '@/app/archive-index.css';
-import { useState, useCallback } from 'react';
-import { ArchivePageFrame } from '@/components/archive/ArchivePageFrame';
-import { ArchiveIndexTable } from '@/components/archive/ArchiveIndexTable';
-import { 
-  ARCHIVE_ENTRIES, 
-  flattenGroups, 
-  groupEntries,
-} from '@/lib/archive/revisioning';
+import Link from 'next/link';
 
 // ─────────────────────────────────────────────────────────────────────────────────
-// CONSTANTS
+// TIER DATA
 // ─────────────────────────────────────────────────────────────────────────────────
 
-const DOC_ID = 'D0-0';
-const DOC_REV = '1';
-const ISSUED_YEAR = '2026';
-const REGISTRY = 'REMILIA';
-const TOTAL_PAGES = 2;
-
-// Split entries for pagination
-const groupedEntries = groupEntries(ARCHIVE_ENTRIES);
-const allEntries = flattenGroups(groupedEntries);
-const PAGE_1_ENTRIES = allEntries.slice(0, 6);
-const PAGE_2_ENTRIES = allEntries.slice(6);
+const TIERS = [
+  { id: 'tier-iv', label: 'TIER IV — MONUMENT', text: 'REMILIA', className: 'threshold-tier--monument' },
+  { id: 'tier-iii', label: 'TIER III — STATE', text: 'REMILIA STATE', className: 'threshold-tier--state' },
+  { id: 'tier-ii', label: 'TIER II — ARCHIVE', text: 'REMILIA ARCHIVE', className: 'threshold-tier--archive' },
+  { id: 'tier-i', label: 'TIER I — LABEL', text: 'REMILIA INDEX', className: 'threshold-tier--label' },
+  { id: 'tier-0', label: 'TIER 0 — MICRO', text: 'REMILIA REF', className: 'threshold-tier--micro' },
+] as const;
 
 // ─────────────────────────────────────────────────────────────────────────────────
 // PAGE
 // ─────────────────────────────────────────────────────────────────────────────────
 
-export default function ArchivePage() {
-  const [currentPage, setCurrentPage] = useState(1);
-
-  const handlePageEnterView = useCallback((pageNumber: number) => {
-    setCurrentPage(pageNumber);
-  }, []);
-
+export default function ArchiveThresholdPage() {
   return (
-    <div className="archive-container">
-      {/* ═══════════════════════════════════════════════════════════════
-          PAGE 1 — Cover header + first part of table
-      ═══════════════════════════════════════════════════════════════ */}
-      <ArchivePageFrame
-        pageNumber={1}
-        totalPages={TOTAL_PAGES}
-        docId={DOC_ID}
-        rev={DOC_REV}
-        issuedYear={ISSUED_YEAR}
-        registry={REGISTRY}
-        isFirstPage={true}
-        onEnterView={handlePageEnterView}
-      >
-        {/* Right margin refs */}
-        <div className="archive-margin-refs">
-          <span className="archive-margin-ref archive-margin-ref--current">D0-0</span>
-          <span className="archive-margin-ref">D0-1</span>
+    <div className="threshold-container">
+      {/* Crop marks */}
+      <div className="threshold-crop-marks" aria-hidden="true">
+        <div className="threshold-crop-mark threshold-crop-mark--tl" />
+        <div className="threshold-crop-mark threshold-crop-mark--tr" />
+        <div className="threshold-crop-mark threshold-crop-mark--br" />
+        <div className="threshold-crop-mark threshold-crop-mark--bl" />
+      </div>
+
+      {/* Right vertical rule */}
+      <div className="threshold-right-rule" aria-hidden="true" />
+
+      {/* Main content field */}
+      <main className="threshold-field">
+        {/* Left stamp */}
+        <div className="threshold-stamp">
+          <span className="threshold-stamp-line">DOCUMENT T0-0</span>
+          <span className="threshold-stamp-line">TYPE CALIBRATION</span>
+          <span className="threshold-stamp-line">REV 1</span>
         </div>
 
-        {/* Cover Header */}
-        <header className="archive-cover-header">
-          {/* Meta stack (Micro tier) */}
-          <div className="archive-cover-meta">
-            <span className="archive-cover-meta-line">REMILIA ARCHIVE</span>
-            <span className="archive-cover-meta-line">REGISTRY: PUBLIC</span>
-            <span className="archive-cover-meta-line">BUILD: V1</span>
-            <span className="archive-cover-meta-line">ROOT 16 · RATIO 1.25</span>
-            <span className="archive-cover-meta-line">ISSUED {ISSUED_YEAR}</span>
-          </div>
-
-          {/* Title (Monument tier) */}
-          <h1 className="archive-cover-title">ARCHIVE INDEX</h1>
-
-          {/* Status row (Label tier) */}
-          <div className="archive-cover-status">
-            <span className="archive-cover-status-item">STATUS: ACTIVE</span>
-            <span className="archive-cover-status-item">PROTOCOL: STABLE</span>
-            <span className="archive-cover-status-item">SCOPE: DOCUMENTED</span>
-          </div>
-
-          {/* Divider */}
-          <div className="archive-cover-divider" aria-hidden="true" />
-        </header>
-
-        {/* Index Table — Page 1 entries */}
-        <ArchiveIndexTable entries={PAGE_1_ENTRIES} />
-      </ArchivePageFrame>
-
-      {/* ═══════════════════════════════════════════════════════════════
-          PAGE 2 — Continuation of table
-      ═══════════════════════════════════════════════════════════════ */}
-      <ArchivePageFrame
-        pageNumber={2}
-        totalPages={TOTAL_PAGES}
-        docId={DOC_ID}
-        rev={DOC_REV}
-        issuedYear={ISSUED_YEAR}
-        registry={REGISTRY}
-        isFirstPage={false}
-        onEnterView={handlePageEnterView}
-      >
-        {/* Right margin refs */}
-        <div className="archive-margin-refs">
-          <span className="archive-margin-ref archive-margin-ref--current">D0-0</span>
-          <span className="archive-margin-ref">D0-1</span>
+        {/* Right margin tier labels */}
+        <div className="threshold-margin-labels" aria-hidden="true">
+          {TIERS.map((tier) => (
+            <span 
+              key={tier.id} 
+              className="threshold-margin-label"
+              data-tier={tier.id}
+            >
+              {tier.label}
+            </span>
+          ))}
         </div>
 
-        {/* Index Table — Page 2 entries */}
-        <ArchiveIndexTable entries={PAGE_2_ENTRIES} />
-      </ArchivePageFrame>
+        {/* Type scale ladder */}
+        <section className="threshold-ladder" aria-label="Typographic Scale">
+          {TIERS.map((tier) => (
+            <div 
+              key={tier.id} 
+              className={`threshold-tier ${tier.className}`}
+              data-tier={tier.id}
+            >
+              <span className="threshold-tier-text">{tier.text}</span>
+            </div>
+          ))}
+        </section>
+
+        {/* Entry inscription */}
+        <div className="threshold-entry">
+          <Link href="/archive/index" className="threshold-entry-inscription">
+            PROCEED TO ARCHIVE
+          </Link>
+        </div>
+
+        {/* Footer */}
+        <footer className="threshold-footer">
+          <span className="threshold-footer-left">ISSUED 2026 · REMILIA</span>
+          <span className="threshold-footer-right">DOC T0-0 · REV 1</span>
+        </footer>
+      </main>
     </div>
   );
 }
